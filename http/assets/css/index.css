@@ -1,0 +1,101 @@
+/* Margin */
+h1     { margin-bottom: 2.0rem; }
+h2     { margin-bottom: 2.0rem; }
+h3     { margin-bottom: 2.0rem; }
+h4     { margin-bottom: 2.0rem; }
+h5     { margin-bottom: 2.0rem; }
+h6     { margin-bottom: 2.0rem; }
+p      { margin-bottom: 3.0rem; }
+hr     { margin-bottom: 1.0rem; margin-top: 0; width: 100%; }
+
+/* Header and navigation */
+header {
+    padding-top: 1rem;
+}
+
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+header nav .left a {
+    text-decoration: none;
+    color: black;
+}
+
+header nav .left a h5 {
+    margin-bottom: 0;
+}
+
+header nav .right a.button {
+    margin-bottom: 0;
+}
+
+/* Main */
+main .container {
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Index */
+.index main .hero {
+    text-align: center;
+    padding: 5.0rem 0;
+}
+
+.index main .hero p {
+    margin-bottom: 1.0rem;
+}
+
+.index main .hero form {
+    display: inline-block;
+}
+
+.index main .hero form input {
+    margin-bottom: 0;
+}
+
+.index main .hero form input[type="url"] {
+    width: 300px;
+}
+
+.index main .link {
+    width: 100%;
+}
+
+.index main .link {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.0rem;
+}
+
+.index main .link .slug {
+    display: inline-block;
+    width: 5.0rem;
+    margin-right: 2.0rem;
+}
+
+.index main .link .url {
+    display: inline-block;
+    margin-right: 2.0rem;
+    flex: 1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-width: 5.0rem;
+}
+
+.index main .link button {
+    margin-bottom: 0;
+    margin-right: 2.0rem;
+}
+
+.index main .link button.delete {
+    margin-right: 0;
+    background-color: #e33;
+    border-color: #e33;
+}

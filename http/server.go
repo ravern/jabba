@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/ravernkoh/jabba/http/middleware"
@@ -37,13 +36,14 @@ func (s *Server) Router() chi.Router {
 		middleware.ErrorPage(http.StatusInternalServerError, internalServerError),
 	)
 
-	// Mount static routes
-	r.Get("/", s.Landing)
+	// Mount main routes
+	r.Get("/", s.Root)
 
 	// Mount assets
-	fileServer(r, "/", assets)
+	fileServer(r, "/public", assets)
 
-	// Prevent any text from being rendered during a 404
+	// Override not found handler to prevent "404 page not found" from
+	// being sent in the response.
 	r.NotFound(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
@@ -58,10 +58,6 @@ func (s *Server) Router() chi.Router {
 //
 // Added Neuter for directories.
 func fileServer(r chi.Router, path string, root http.FileSystem) {
-	if strings.ContainsAny(path, "{}*") {
-		panic("FileServer does not permit URL parameters.")
-	}
-
 	fs := http.StripPrefix(path, http.FileServer(root))
 
 	if path != "/" && path[len(path)-1] != '/' {
