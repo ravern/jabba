@@ -31,5 +31,10 @@ func Production() error {
 		return err
 	}
 
+	// Clean up static files
+	if err := sh.RunV("packr", "clean"); err != nil {
+		return err
+	}
+
 	return nil
 }

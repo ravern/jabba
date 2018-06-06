@@ -1,19 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/gobuffalo/packr"
 	"github.com/joho/godotenv"
 	"github.com/ravernkoh/jabba/http"
 	"github.com/sirupsen/logrus"
 )
 
-func main() {
-	must(godotenv.Load(), 1)
+func init() {
+	if err := godotenv.Load(); err != nil {
+		panic(err)
+	}
+}
 
-	// Load environment variables
+func main() {
+	// Get environment variables
 	var (
 		development = os.Getenv("DEVELOPMENT") != ""
 		port        = os.Getenv("PORT")
@@ -26,29 +28,20 @@ func main() {
 	}
 	logger.WithFields(logrus.Fields{
 		"development": development,
-	}).Info("created logger")
-
-	// Load static assets
-	assets := packr.NewBox("../../assets")
-	logger.Info("loaded static assets")
+	}).Info("main: created logger")
 
 	// Start up the server
 	server := http.Server{
 		Port:   port,
-		Assets: assets,
 		Logger: logger,
 	}
 	logger.WithFields(logrus.Fields{
 		"port": port,
-	}).Info("server listening...")
-	must(server.Listen(), 1)
-}
-
-// must will exit the application with the given exit code if the given error
-// is non-nil.
-func must(err error, code int) {
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(code)
+	}).Info("main: created server")
+	if err := server.Listen(); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("main: server quit")
+		os.Exit(1)
 	}
 }
