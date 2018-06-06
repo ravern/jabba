@@ -25,13 +25,19 @@ func (s *Server) Listen() error {
 func (s *Server) Router() chi.Router {
 	r := chi.NewRouter()
 
-	// Mount static assets
-	fileServer(r, "/", assets)
+	// Global middleware
+	r.Use(
+		middleware.SetLogger(s.Logger),
+		middleware.LogRequest,
+	)
 
 	// Mount sample route
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		templates.ExecuteTemplate(w, "index.html", nil)
 	})
+
+	// Mount static assets
+	fileServer(r, "/", assets)
 
 	return r
 }

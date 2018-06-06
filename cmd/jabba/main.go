@@ -1,3 +1,4 @@
+// Command jabba runs the web server.
 package main
 
 import (

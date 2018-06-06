@@ -1,3 +1,4 @@
+// Package http implements the HTTP interface.
 package http
 
 import (

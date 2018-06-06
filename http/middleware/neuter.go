@@ -12,6 +12,7 @@ func Neuter(next http.Handler) http.Handler {
 			http.NotFound(w, r)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
 }
