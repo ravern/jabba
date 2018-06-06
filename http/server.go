@@ -1,6 +1,7 @@
 package http
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -34,6 +35,7 @@ func (s *Server) Router() chi.Router {
 	// Mount sample route
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		templates.ExecuteTemplate(w, "index.html", nil)
+		fmt.Println(s.Database.GetUser("hello"))
 	})
 
 	// Mount static assets

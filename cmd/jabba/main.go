@@ -43,14 +43,16 @@ func main() {
 		}).Error("main: failed to open database connection")
 		os.Exit(1)
 	}
+	defer database.Close()
 	logger.WithFields(logrus.Fields{
 		"path": databasePath,
 	}).Info("main: opened database connection")
 
 	// Start up the server
 	server := http.Server{
-		Port:   port,
-		Logger: logger,
+		Port:     port,
+		Logger:   logger,
+		Database: &database,
 	}
 	logger.WithFields(logrus.Fields{
 		"port": port,
