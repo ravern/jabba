@@ -16,11 +16,18 @@ func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 				"request_id": uuid.NewV4(),
 				"path":       r.URL.Path,
 			})
-			ctx := context.WithValue(r.Context(), KeyLogger, l)
+			ctx := context.WithValue(r.Context(), keyLogger, l)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+// Logger returns the logger for the given request.
+//
+// Panics if the logger is not found.
+func Logger(r *http.Request) logrus.FieldLogger {
+	return r.Context().Value(keyLogger).(logrus.FieldLogger)
 }
 
 // LogRequest logs information about the request.
@@ -29,7 +36,7 @@ func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rw := responseWriter{w: w}
-		l := r.Context().Value(KeyLogger).(logrus.FieldLogger)
+		l := Logger(r)
 		l.Info("http: received request")
 
 		next.ServeHTTP(&rw, r)

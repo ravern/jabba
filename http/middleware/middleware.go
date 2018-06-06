@@ -3,12 +3,12 @@ package middleware
 
 import "net/http"
 
-// Key is used within contexts as a key.
-type Key string
+// key is used within contexts as a key.
+type key string
 
 // Keys used by the middleware defined in this package.
 const (
-	KeyLogger Key = "logger"
+	keyLogger key = "logger"
 )
 
 // responseWriter wraps a http.ResponseWriter, forwarding method calls while
