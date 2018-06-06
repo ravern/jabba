@@ -18,11 +18,7 @@ type Server struct {
 
 // Listen listens for requests, blocking until an error occurs.
 func (s *Server) Listen() error {
-	r := s.Router()
-	s.Logger.WithFields(logrus.Fields{
-		"port": s.Port,
-	}).Info("http: server started listening")
-	return http.ListenAndServe(s.Port, r)
+	return http.ListenAndServe(s.Port, s.Router())
 }
 
 // Router mounts all routes on a router and returns it.
@@ -31,7 +27,6 @@ func (s *Server) Router() chi.Router {
 
 	// Mount static assets
 	fileServer(r, "/", assets)
-	s.Logger.Info("http: mounted static assets")
 
 	// Mount sample route
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

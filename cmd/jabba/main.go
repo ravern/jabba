@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/ravernkoh/jabba/bolt"
 	"github.com/ravernkoh/jabba/http"
 	"github.com/sirupsen/logrus"
 )
@@ -17,8 +18,9 @@ func init() {
 func main() {
 	// Get environment variables
 	var (
-		development = os.Getenv("DEVELOPMENT") != ""
-		port        = os.Getenv("PORT")
+		development  = os.Getenv("DEVELOPMENT") != ""
+		port         = os.Getenv("PORT")
+		databasePath = os.Getenv("DATABASE_PATH")
 	)
 
 	// Create the logger
@@ -30,6 +32,20 @@ func main() {
 		"development": development,
 	}).Info("main: created logger")
 
+	// Open the database connection
+	database := bolt.Database{
+		Path: databasePath,
+	}
+	if err := database.Open(); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("main: failed to open database connection")
+		os.Exit(1)
+	}
+	logger.WithFields(logrus.Fields{
+		"path": databasePath,
+	}).Info("main: opened database connection")
+
 	// Start up the server
 	server := http.Server{
 		Port:   port,
@@ -37,7 +53,7 @@ func main() {
 	}
 	logger.WithFields(logrus.Fields{
 		"port": port,
-	}).Info("main: created server")
+	}).Info("main: server started listening")
 	if err := server.Listen(); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
