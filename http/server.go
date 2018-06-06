@@ -1,7 +1,7 @@
 package http
 
 import (
-	"fmt"
+	"context"
 	"net/http"
 	"strings"
 
@@ -28,24 +28,31 @@ func (s *Server) Router() chi.Router {
 
 	// Global middleware
 	r.Use(
+		// Logging
 		middleware.SetLogger(s.Logger),
 		middleware.LogRequest,
+
+		// Error pages
+		middleware.ErrorPage(http.StatusNotFound, notFound),
+		middleware.ErrorPage(http.StatusInternalServerError, internalServerError),
 	)
 
-	// Mount sample route
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		templates.ExecuteTemplate(w, "index.html", nil)
-		fmt.Println(s.Database.GetUser("hello"))
-	})
+	// Mount static routes
+	r.Get("/", s.Landing)
 
-	// Mount static assets
+	// Mount assets
 	fileServer(r, "/", assets)
+
+	// Prevent any text from being rendered during a 404
+	r.NotFound(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
 
 	return r
 }
 
-// fileServer conveniently sets up a http.FileServer handler to serve static
-// files from a http.FileSystem.
+// fileServer conveniently sets up a http.FileServer handler to serve assets
+// from a http.FileSystem.
 //
 // https://github.com/go-chi/chi/blob/master/_examples/fileserver/main.go#L26-L44
 //

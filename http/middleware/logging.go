@@ -23,26 +23,6 @@ func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 	}
 }
 
-// responseWriter wraps a http.ResponseWriter, forwarding method calls while
-// recording information about the response for logging.
-type responseWriter struct {
-	w          http.ResponseWriter
-	statusCode int
-}
-
-func (rw *responseWriter) Header() http.Header {
-	return rw.w.Header()
-}
-
-func (rw *responseWriter) WriteHeader(statusCode int) {
-	rw.statusCode = statusCode
-	rw.w.WriteHeader(statusCode)
-}
-
-func (rw *responseWriter) Write(b []byte) (n int, err error) {
-	return rw.w.Write(b)
-}
-
 // LogRequest logs information about the request.
 //
 // It will panic if no logger is found in the context.
@@ -57,7 +37,7 @@ func LogRequest(next http.Handler) http.Handler {
 		l = l.WithFields(logrus.Fields{
 			"status_code": rw.statusCode,
 		})
-		if rw.statusCode >= 500 {
+		if rw.statusCode >= http.StatusInternalServerError {
 			l.Error("http: responded to request")
 		} else {
 			l.Info("http: responded to request")
