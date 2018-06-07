@@ -18,7 +18,11 @@
                 <div class="link">
                         <a class="slug" href="{{ .URL }}">{{ .Slug }}</a>
                         <span class="url">{{ .Title }}</span>
-                        <button class="button-primary">COPY</button>
+                        <button
+                            class="button-primary"
+                            id="copy-{{ .Slug }}"
+                            onclick="copy($('#copy-{{ .Slug }}'), {{ .URL.String }})"
+                        >COPY</button>
                         <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
                         <button class="button-primary delete">DELETE</button>
                 </div>
