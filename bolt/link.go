@@ -10,7 +10,7 @@ import (
 
 // CreateLink creates a new link.
 func (d *Database) CreateLink(l *model.Link) error {
-	err := d.db.Update(func(tx *bolt.Tx) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
 			return err
@@ -31,7 +31,6 @@ func (d *Database) CreateLink(l *model.Link) error {
 
 		return nil
 	})
-	return err
 }
 
 // FetchLinks returns the links created by the given user.

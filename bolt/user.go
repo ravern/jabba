@@ -10,7 +10,7 @@ import (
 
 // CreateUser creates a new user.
 func (d *Database) CreateUser(u *model.User) error {
-	err := d.db.Update(func(tx *bolt.Tx) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
 		users, err := tx.CreateBucketIfNotExists([]byte(usersBucket))
 		if err != nil {
 			return err
@@ -31,7 +31,6 @@ func (d *Database) CreateUser(u *model.User) error {
 
 		return nil
 	})
-	return err
 }
 
 // FetchUser returns the user with the given username.
