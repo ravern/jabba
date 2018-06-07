@@ -1,5 +1,6 @@
 MODULE                                      VERSION
 github.com/ravernkoh/jabba                  -
+github.com/badoux/goscraper                 v0.0.0-20170322173343-0213ced70878
 github.com/boltdb/bolt                      v1.3.1
 github.com/davecgh/go-spew                  v1.1.0
 github.com/go-chi/chi                       v0.0.0-20171222161133-e83ac2304db3

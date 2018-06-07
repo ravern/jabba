@@ -9,6 +9,7 @@ require (
 	github.com/onsi/ginkgo v1.5.0
 	github.com/onsi/gomega v1.4.0
 	github.com/pkg/errors v0.8.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.0.5
 	github.com/stretchr/testify v1.2.1
 	go.uber.org/atomic v1.3.2

@@ -9,7 +9,7 @@ import (
 )
 
 // CreateLink creates a new link.
-func (d *Database) CreateLink(l *model.Link) error {
+func (d *Database) CreateLink(l *model.Link, v *model.Visitor) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
@@ -29,11 +29,26 @@ func (d *Database) CreateLink(l *model.Link) error {
 			return err
 		}
 
+		visitors := tx.Bucket([]byte(visitorsBucket))
+		if visitors == nil {
+			return fmt.Errorf("bolt: visitors not found")
+		}
+
+		v.LinkSlugs = append(v.LinkSlugs, l.Slug)
+		visitor, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+
+		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
 
-// FetchLinks returns the links created by the given user.
+// FetchLinks returns the links with the given slugs.
 func (d *Database) FetchLinks(slugs []string) ([]*model.Link, error) {
 	var ll []*model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {

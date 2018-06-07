@@ -10,6 +10,15 @@ import (
 	"github.com/gobuffalo/packr"
 )
 
+// key is used within contexts as a key.
+type key string
+
+// Keys used by the middleware defined in this package.
+const (
+	keyVisitor key = "visitor"
+)
+
+// Assets and templates loaded using packr.
 var (
 	assets    http.FileSystem
 	templates *template.Template

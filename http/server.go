@@ -44,8 +44,16 @@ func (s *Server) Router() chi.Router {
 	fileServer(r, "/public", assets)
 
 	// Mount link routes
-	r.Get("/", s.Index)
-	r.Get("/{slug}", s.Redirect)
+	r.Group(func(r chi.Router) {
+		r.Use(
+			// Authentication
+			s.SetVisitor,
+		)
+
+		r.Get("/", s.Index)
+		r.Get("/{slug}", s.Redirect)
+		r.Post("/", s.Shorten)
+	})
 
 	// Override not found handler to prevent "404 page not found" from
 	// being sent in the response.
