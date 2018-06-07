@@ -8,6 +8,6 @@ type Database interface {
 	FetchUser(username string) (*model.User, error)
 
 	CreateLink(*model.Link) error
-	FetchLinks(*model.User) ([]*model.Link, error)
+	FetchLinks(slugs []string) ([]*model.Link, error)
 	FetchLink(slug string) (*model.Link, error)
 }

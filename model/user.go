@@ -2,7 +2,7 @@ package model
 
 import "time"
 
-// User represents a user.
+// User represents a registered user.
 type User struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`

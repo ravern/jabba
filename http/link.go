@@ -28,7 +28,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		"username": username,
 	}).Info("fetched user")
 
-	links, err := s.Database.FetchLinks(user)
+	links, err := s.Database.FetchLinks(user.LinkSlugs)
 	if err != nil {
 		logger.Error("failed to fetch links")
 		w.WriteHeader(http.StatusInternalServerError)

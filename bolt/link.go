@@ -34,7 +34,7 @@ func (d *Database) CreateLink(l *model.Link) error {
 }
 
 // FetchLinks returns the links created by the given user.
-func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
+func (d *Database) FetchLinks(slugs []string) ([]*model.Link, error) {
 	var ll []*model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {
 		links := tx.Bucket([]byte(linksBucket))
@@ -42,7 +42,7 @@ func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
 			return fmt.Errorf("bolt: links not found")
 		}
 
-		for _, slug := range u.LinkSlugs {
+		for _, slug := range slugs {
 			var l *model.Link
 
 			link := links.Get([]byte(slug))
