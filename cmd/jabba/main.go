@@ -29,24 +29,16 @@ func main() {
 	if !development {
 		logger.Formatter = &logrus.JSONFormatter{}
 	}
-	logger.WithFields(logrus.Fields{
-		"development": development,
-	}).Info("main: created logger")
 
 	// Open the database connection
 	database := bolt.Database{
-		Path: databasePath,
+		Path:   databasePath,
+		Logger: logger,
 	}
 	if err := database.Open(); err != nil {
-		logger.WithFields(logrus.Fields{
-			"err": err,
-		}).Error("main: failed to open database connection")
 		os.Exit(1)
 	}
 	defer database.Close()
-	logger.WithFields(logrus.Fields{
-		"path": databasePath,
-	}).Info("main: opened database connection")
 
 	// Start up the server
 	server := http.Server{
@@ -54,13 +46,9 @@ func main() {
 		Logger:   logger,
 		Database: &database,
 	}
-	logger.WithFields(logrus.Fields{
-		"port": port,
-	}).Info("main: server started listening")
-	if err := server.Listen(); err != nil {
-		logger.WithFields(logrus.Fields{
-			"err": err,
-		}).Error("main: server quit")
-		os.Exit(1)
-	}
+	server.Listen()
+
+	// Always exit with an error code since a web server should technically
+	// run forever until an error occurs.
+	os.Exit(1)
 }

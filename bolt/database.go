@@ -22,12 +22,14 @@ type Database struct {
 
 // Open opens up a connection to the database.
 func (d *Database) Open() error {
-	db, err := bolt.Open(d.Path, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	db, err := bolt.Open(d.Path, 0600, &bolt.Options{Timeout: 5 * time.Second})
 	if err != nil {
+		d.Logger.Errorf("bolt: failed to open database at %s", d.Path)
 		return err
 	}
 	d.db = db
 
+	d.Logger.Infof("bolt: opened database at %s", d.Path)
 	return nil
 }
 

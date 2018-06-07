@@ -12,7 +12,7 @@ import (
 
 // CreateLink creates a new link.
 func (d *Database) CreateLink(l *model.Link) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
 			return err
@@ -27,7 +27,7 @@ func (d *Database) CreateLink(l *model.Link) error {
 		link := b.Bytes()
 
 		if links.Get(link) != nil {
-			return fmt.Errorf("bolt: slug already exists")
+			return fmt.Errorf("bolt: link already exists")
 		}
 		if err := links.Put(slug, link); err != nil {
 			return err
@@ -35,10 +35,21 @@ func (d *Database) CreateLink(l *model.Link) error {
 
 		return nil
 	})
+	if err == nil {
+		d.Logger.WithFields(logrus.Fields{
+			"slug": l.Slug,
+		}).Info("bolt: created link")
+	} else {
+		d.Logger.WithFields(logrus.Fields{
+			"slug": l.Slug,
+			"err":  err,
+		}).Warn("bolt: failed to create link")
+	}
+	return err
 }
 
-// GetLinks returns the links that belong to the given user.
-func (d *Database) GetLinks(u *model.User) ([]*model.Link, error) {
+// FetchLinks returns the links created by the given user.
+func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
 	var ll []*model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {
 		links := tx.Bucket([]byte(linksBucket))
@@ -70,11 +81,18 @@ func (d *Database) GetLinks(u *model.User) ([]*model.Link, error) {
 
 		return nil
 	})
+	if err == nil {
+		d.Logger.Infof("bolt: fetched %d links", len(ll))
+	} else {
+		d.Logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Info("bolt: failed to fetch links")
+	}
 	return ll, err
 }
 
-// GetLink returns the link with the given slug.
-func (d *Database) GetLink(slug string) (*model.Link, error) {
+// FetchLink returns the link with the given slug.
+func (d *Database) FetchLink(slug string) (*model.Link, error) {
 	var l *model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {
 		links := tx.Bucket([]byte(linksBucket))
@@ -94,5 +112,15 @@ func (d *Database) GetLink(slug string) (*model.Link, error) {
 
 		return nil
 	})
+	if err == nil {
+		d.Logger.WithFields(logrus.Fields{
+			"slug": slug,
+		}).Info("bolt: fetched link")
+	} else {
+		d.Logger.WithFields(logrus.Fields{
+			"slug": slug,
+			"err":  err,
+		}).Warn("bolt: failed to fetch link")
+	}
 	return l, err
 }

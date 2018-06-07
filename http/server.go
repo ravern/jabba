@@ -18,7 +18,12 @@ type Server struct {
 
 // Listen listens for requests, blocking until an error occurs.
 func (s *Server) Listen() error {
-	return http.ListenAndServe(s.Port, s.Router())
+	// This is a lie!
+	s.Logger.Infof("http: server listening on %s", s.Port)
+
+	err := http.ListenAndServe(s.Port, s.Router())
+	s.Logger.Error("http: server quit")
+	return err
 }
 
 // Router mounts all routes on a router and returns it.

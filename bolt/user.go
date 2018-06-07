@@ -7,11 +7,12 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/ravernkoh/jabba/model"
+	"github.com/sirupsen/logrus"
 )
 
 // CreateUser creates a new user.
 func (d *Database) CreateUser(u *model.User) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		users, err := tx.CreateBucketIfNotExists([]byte(usersBucket))
 		if err != nil {
 			return err
@@ -26,7 +27,7 @@ func (d *Database) CreateUser(u *model.User) error {
 		user := b.Bytes()
 
 		if users.Get(username) != nil {
-			return fmt.Errorf("bolt: username already exists")
+			return fmt.Errorf("bolt: user already exists")
 		}
 		if err := users.Put(username, user); err != nil {
 			return err
@@ -34,10 +35,21 @@ func (d *Database) CreateUser(u *model.User) error {
 
 		return nil
 	})
+	if err == nil {
+		d.Logger.WithFields(logrus.Fields{
+			"username": u.Username,
+		}).Info("bolt: created user")
+	} else {
+		d.Logger.WithFields(logrus.Fields{
+			"username": u.Username,
+			"err":      err,
+		}).Warn("bolt: failed to create user")
+	}
+	return err
 }
 
-// GetUser returns the user with the given username.
-func (d *Database) GetUser(username string) (*model.User, error) {
+// FetchUser returns the user with the given username.
+func (d *Database) FetchUser(username string) (*model.User, error) {
 	var u *model.User
 	err := d.db.View(func(tx *bolt.Tx) error {
 		users := tx.Bucket([]byte(usersBucket))
@@ -57,5 +69,15 @@ func (d *Database) GetUser(username string) (*model.User, error) {
 
 		return nil
 	})
+	if err == nil {
+		d.Logger.WithFields(logrus.Fields{
+			"username": username,
+		}).Info("bolt: fetched user")
+	} else {
+		d.Logger.WithFields(logrus.Fields{
+			"username": username,
+			"err":      err,
+		}).Warn("bolt: failed to fetch user")
+	}
 	return u, err
 }
