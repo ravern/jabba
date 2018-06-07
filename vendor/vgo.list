@@ -2,7 +2,7 @@ MODULE                                      VERSION
 github.com/ravernkoh/jabba                  -
 github.com/boltdb/bolt                      v1.3.1
 github.com/davecgh/go-spew                  v1.1.0
-github.com/go-chi/chi                       v1.0.0
+github.com/go-chi/chi                       v0.0.0-20171222161133-e83ac2304db3
 github.com/gobuffalo/packr                  v1.11.0
 github.com/golang/protobuf                  v1.1.0
 github.com/joho/godotenv                    v1.2.0

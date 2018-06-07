@@ -4,173 +4,411 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"reflect"
 	"testing"
-
-	"golang.org/x/net/context"
-)
-
-var (
-	emptyParams = map[string]string{}
 )
 
 func TestTree(t *testing.T) {
-	hStub := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hIndex := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hFavicon := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleList := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleNear := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleShow := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleShowRelated := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleShowOpts := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleSlug := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hArticleByUser := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hUserList := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hUserShow := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hAdminCatchall := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hAdminAppShow := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hAdminAppShowCatchall := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hUserProfile := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hUserSuper := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hUserAll := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hHubView1 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hHubView2 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	hHubView3 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
+	hStub := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hIndex := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hFavicon := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleList := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleNear := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleShow := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleShowRelated := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleShowOpts := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleSlug := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hArticleByUser := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hUserList := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hUserShow := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hAdminCatchall := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hAdminAppShow := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hAdminAppShowCatchall := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hUserProfile := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hUserSuper := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hUserAll := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hHubView1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hHubView2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hHubView3 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
-	tr := &tree{root: &node{}}
+	tr := &node{}
 
-	tr.Insert("/", hIndex)
-	tr.Insert("/favicon.ico", hFavicon)
+	tr.InsertRoute(mGET, "/", hIndex)
+	tr.InsertRoute(mGET, "/favicon.ico", hFavicon)
 
-	tr.Insert("/pages/*", hStub)
+	tr.InsertRoute(mGET, "/pages/*", hStub)
 
-	tr.Insert("/article", hArticleList)
-	tr.Insert("/article/", hArticleList) // redirect..?
+	tr.InsertRoute(mGET, "/article", hArticleList)
+	tr.InsertRoute(mGET, "/article/", hArticleList)
 
-	tr.Insert("/article/near", hArticleNear)
-	// tr.Insert("/article/:sup", hStub) // will get overwritten as :id param TODO -- what does goji do..?
-	tr.Insert("/article/:id", hStub)
-	tr.Insert("/article/:id", hArticleShow)
-	tr.Insert("/article/:id", hArticleShow) // duplicate will have no effect
-	tr.Insert("/article/@:user", hArticleByUser)
+	tr.InsertRoute(mGET, "/article/near", hArticleNear)
+	tr.InsertRoute(mGET, "/article/{id}", hStub)
+	tr.InsertRoute(mGET, "/article/{id}", hArticleShow)
+	tr.InsertRoute(mGET, "/article/{id}", hArticleShow) // duplicate will have no effect
+	tr.InsertRoute(mGET, "/article/@{user}", hArticleByUser)
 
-	tr.Insert("/article/:sup/:opts", hArticleShowOpts) // TODO: and what if someone adds this?
-	tr.Insert("/article/:id/:opts", hArticleShowOpts)
+	tr.InsertRoute(mGET, "/article/{sup}/{opts}", hArticleShowOpts)
+	tr.InsertRoute(mGET, "/article/{id}/{opts}", hArticleShowOpts) // overwrite above route, latest wins
 
-	tr.Insert("/article/:iffd/edit", hStub)
-	tr.Insert("/article/:id//related", hArticleShowRelated)
-	tr.Insert("/article/slug/:month/-/:day/:year", hArticleSlug)
+	tr.InsertRoute(mGET, "/article/{iffd}/edit", hStub)
+	tr.InsertRoute(mGET, "/article/{id}//related", hArticleShowRelated)
+	tr.InsertRoute(mGET, "/article/slug/{month}/-/{day}/{year}", hArticleSlug)
 
-	tr.Insert("/admin/user", hUserList)
-	tr.Insert("/admin/user/", hStub) // will get replaced by next route
-	tr.Insert("/admin/user/", hUserList)
+	tr.InsertRoute(mGET, "/admin/user", hUserList)
+	tr.InsertRoute(mGET, "/admin/user/", hStub) // will get replaced by next route
+	tr.InsertRoute(mGET, "/admin/user/", hUserList)
 
-	tr.Insert("/admin/user//:id", hUserShow)
-	tr.Insert("/admin/user/:id", hUserShow) // TODO: how does goji handle those segments?
+	tr.InsertRoute(mGET, "/admin/user//{id}", hUserShow)
+	tr.InsertRoute(mGET, "/admin/user/{id}", hUserShow)
 
-	tr.Insert("/admin/apps/:id", hAdminAppShow)
-	tr.Insert("/admin/apps/:id/*ff", hAdminAppShowCatchall)
+	tr.InsertRoute(mGET, "/admin/apps/{id}", hAdminAppShow)
+	tr.InsertRoute(mGET, "/admin/apps/{id}/*ff", hAdminAppShowCatchall) // TODO: ALLOWED...? prob not.. panic..?
 
-	tr.Insert("/admin/*ff", hStub) // catchall segment will get replaced by next route
-	tr.Insert("/admin/*", hAdminCatchall)
+	tr.InsertRoute(mGET, "/admin/*ff", hStub) // catchall segment will get replaced by next route
+	tr.InsertRoute(mGET, "/admin/*", hAdminCatchall)
 
-	tr.Insert("/users/:userID/profile", hUserProfile)
-	tr.Insert("/users/super/*", hUserSuper)
-	tr.Insert("/users/*", hUserAll)
+	tr.InsertRoute(mGET, "/users/{userID}/profile", hUserProfile)
+	tr.InsertRoute(mGET, "/users/super/*", hUserSuper)
+	tr.InsertRoute(mGET, "/users/*", hUserAll)
 
-	tr.Insert("/hubs/:hubID/view", hHubView1)
-	tr.Insert("/hubs/:hubID/view/*", hHubView2)
+	tr.InsertRoute(mGET, "/hubs/{hubID}/view", hHubView1)
+	tr.InsertRoute(mGET, "/hubs/{hubID}/view/*", hHubView2)
 	sr := NewRouter()
 	sr.Get("/users", hHubView3)
-	tr.Insert("/hubs/:hubID/*", sr)
-	tr.Insert("/hubs/:hubID/users", hHubView3)
-
-	// tr.Insert("/debug*", hStub) // TODO: should we support this..?
-
-	// TODO: test bad inserts ie.
-	// tr.Insert("")
-	// tr.Insert("/admin/:/joe/:/*") //...?
-	// tr.Insert("------------")
+	tr.InsertRoute(mGET, "/hubs/{hubID}/*", sr)
+	tr.InsertRoute(mGET, "/hubs/{hubID}/users", hHubView3)
 
 	tests := []struct {
-		r string            // input request path
-		h Handler           // output matched handler
-		p map[string]string // output params
+		r string       // input request path
+		h http.Handler // output matched handler
+		k []string     // output param keys
+		v []string     // output param values
 	}{
-		{r: "/", h: hIndex, p: emptyParams},
-		{r: "/favicon.ico", h: hFavicon, p: emptyParams},
+		{r: "/", h: hIndex, k: []string{}, v: []string{}},
+		{r: "/favicon.ico", h: hFavicon, k: []string{}, v: []string{}},
 
-		{r: "/pages", h: nil, p: emptyParams},
-		{r: "/pages/", h: hStub, p: map[string]string{"*": ""}},
-		{r: "/pages/yes", h: hStub, p: map[string]string{"*": "yes"}},
+		{r: "/pages", h: nil, k: []string{}, v: []string{}},
+		{r: "/pages/", h: hStub, k: []string{"*"}, v: []string{""}},
+		{r: "/pages/yes", h: hStub, k: []string{"*"}, v: []string{"yes"}},
 
-		{r: "/article", h: hArticleList, p: emptyParams},
-		{r: "/article/", h: hArticleList, p: emptyParams},
-		{r: "/article/near", h: hArticleNear, p: emptyParams},
-		{r: "/article/neard", h: hArticleShow, p: map[string]string{"id": "neard"}},
-		{r: "/article/123", h: hArticleShow, p: map[string]string{"id": "123"}},
-		{r: "/article/123/456", h: hArticleShowOpts, p: map[string]string{"id": "123", "opts": "456"}},
-		{r: "/article/@peter", h: hArticleByUser, p: map[string]string{"user": "peter"}},
-		{r: "/article/22//related", h: hArticleShowRelated, p: map[string]string{"id": "22"}},
-		{r: "/article/111/edit", h: hStub, p: map[string]string{"id": "111"}},
-		{r: "/article/slug/sept/-/4/2015", h: hArticleSlug, p: map[string]string{"month": "sept", "day": "4", "year": "2015"}},
-		{r: "/article/:id", h: hArticleShow, p: map[string]string{"id": ":id"}}, // TODO review goji?
+		{r: "/article", h: hArticleList, k: []string{}, v: []string{}},
+		{r: "/article/", h: hArticleList, k: []string{}, v: []string{}},
+		{r: "/article/near", h: hArticleNear, k: []string{}, v: []string{}},
+		{r: "/article/neard", h: hArticleShow, k: []string{"id"}, v: []string{"neard"}},
+		{r: "/article/123", h: hArticleShow, k: []string{"id"}, v: []string{"123"}},
+		{r: "/article/123/456", h: hArticleShowOpts, k: []string{"id", "opts"}, v: []string{"123", "456"}},
+		{r: "/article/@peter", h: hArticleByUser, k: []string{"user"}, v: []string{"peter"}},
+		{r: "/article/22//related", h: hArticleShowRelated, k: []string{"id"}, v: []string{"22"}},
+		{r: "/article/111/edit", h: hStub, k: []string{"iffd"}, v: []string{"111"}},
+		{r: "/article/slug/sept/-/4/2015", h: hArticleSlug, k: []string{"month", "day", "year"}, v: []string{"sept", "4", "2015"}},
+		{r: "/article/:id", h: hArticleShow, k: []string{"id"}, v: []string{":id"}},
 
-		{r: "/admin/user", h: hUserList, p: emptyParams},
-		{r: "/admin/user/", h: hUserList, p: emptyParams},
-		{r: "/admin/user/1", h: hUserShow, p: map[string]string{"id": "1"}}, // hmmm.... TODO, review
-		{r: "/admin/user//1", h: hUserShow, p: map[string]string{"id": "1"}},
-		{r: "/admin/hi", h: hAdminCatchall, p: map[string]string{"*": "hi"}},
-		{r: "/admin/lots/of/:fun", h: hAdminCatchall, p: map[string]string{"*": "lots/of/:fun"}},
-		{r: "/admin/apps/333", h: hAdminAppShow, p: map[string]string{"id": "333"}},
-		{r: "/admin/apps/333/woot", h: hAdminAppShowCatchall, p: map[string]string{"id": "333", "*": "woot"}},
+		{r: "/admin/user", h: hUserList, k: []string{}, v: []string{}},
+		{r: "/admin/user/", h: hUserList, k: []string{}, v: []string{}},
+		{r: "/admin/user/1", h: hUserShow, k: []string{"id"}, v: []string{"1"}},
+		{r: "/admin/user//1", h: hUserShow, k: []string{"id"}, v: []string{"1"}},
+		{r: "/admin/hi", h: hAdminCatchall, k: []string{"*"}, v: []string{"hi"}},
+		{r: "/admin/lots/of/:fun", h: hAdminCatchall, k: []string{"*"}, v: []string{"lots/of/:fun"}},
+		{r: "/admin/apps/333", h: hAdminAppShow, k: []string{"id"}, v: []string{"333"}},
+		{r: "/admin/apps/333/woot", h: hAdminAppShowCatchall, k: []string{"id", "*"}, v: []string{"333", "woot"}},
 
-		{r: "/hubs/123/view", h: hHubView1, p: map[string]string{"hubID": "123"}},
-		{r: "/hubs/123/view/index.html", h: hHubView2, p: map[string]string{"hubID": "123", "*": "index.html"}},
-		{r: "/hubs/123/users", h: hHubView3, p: map[string]string{"hubID": "123"}},
+		{r: "/hubs/123/view", h: hHubView1, k: []string{"hubID"}, v: []string{"123"}},
+		{r: "/hubs/123/view/index.html", h: hHubView2, k: []string{"hubID", "*"}, v: []string{"123", "index.html"}},
+		{r: "/hubs/123/users", h: hHubView3, k: []string{"hubID"}, v: []string{"123"}},
 
-		{r: "/users/123/profile", h: hUserProfile, p: map[string]string{"userID": "123"}},
-		{r: "/users/super/123/okay/yes", h: hUserSuper, p: map[string]string{"*": "123/okay/yes"}},
-		{r: "/users/123/okay/yes", h: hUserAll, p: map[string]string{"*": "123/okay/yes"}},
+		{r: "/users/123/profile", h: hUserProfile, k: []string{"userID"}, v: []string{"123"}},
+		{r: "/users/super/123/okay/yes", h: hUserSuper, k: []string{"*"}, v: []string{"123/okay/yes"}},
+		{r: "/users/123/okay/yes", h: hUserAll, k: []string{"*"}, v: []string{"123/okay/yes"}},
 	}
 
 	// log.Println("~~~~~~~~~")
 	// log.Println("~~~~~~~~~")
-	// debugPrintTree(0, 0, tr.root, 0)
+	// debugPrintTree(0, 0, tr, 0)
 	// log.Println("~~~~~~~~~")
 	// log.Println("~~~~~~~~~")
 
 	for i, tt := range tests {
-		// params := make(map[string]string, 0)
-		rctx := NewContext()
-		handler := tr.Find(rctx, tt.r) //, params)
-		params := urlParams(rctx)
+		rctx := NewRouteContext()
+
+		_, handlers, _ := tr.FindRoute(rctx, mGET, tt.r)
+
+		var handler http.Handler
+		if methodHandler, ok := handlers[mGET]; ok {
+			handler = methodHandler.handler
+		}
+
+		paramKeys := rctx.routeParams.Keys
+		paramValues := rctx.routeParams.Values
+
 		if fmt.Sprintf("%v", tt.h) != fmt.Sprintf("%v", handler) {
 			t.Errorf("input [%d]: find '%s' expecting handler:%v , got:%v", i, tt.r, tt.h, handler)
 		}
-		if !reflect.DeepEqual(tt.p, params) {
-			t.Errorf("input [%d]: find '%s' expecting params:%v , got:%v", i, tt.r, tt.p, params)
+		if !stringSliceEqual(tt.k, paramKeys) {
+			t.Errorf("input [%d]: find '%s' expecting paramKeys:(%d)%v , got:(%d)%v", i, tt.r, len(tt.k), tt.k, len(paramKeys), paramKeys)
 		}
+		if !stringSliceEqual(tt.v, paramValues) {
+			t.Errorf("input [%d]: find '%s' expecting paramValues:(%d)%v , got:(%d)%v", i, tt.r, len(tt.v), tt.v, len(paramValues), paramValues)
+		}
+	}
+}
+
+func TestTreeMoar(t *testing.T) {
+	hStub := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub3 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub4 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub5 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub6 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub7 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub8 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub9 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub10 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub11 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub12 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub13 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub14 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub15 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub16 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	// TODO: panic if we see {id}{x} because we're missing a delimiter, its not possible.
+	// also {:id}* is not possible.
+
+	tr := &node{}
+
+	tr.InsertRoute(mGET, "/articlefun", hStub5)
+	tr.InsertRoute(mGET, "/articles/{id}", hStub)
+	tr.InsertRoute(mDELETE, "/articles/{slug}", hStub8)
+	tr.InsertRoute(mGET, "/articles/search", hStub1)
+	tr.InsertRoute(mGET, "/articles/{id}:delete", hStub8)
+	tr.InsertRoute(mGET, "/articles/{iidd}!sup", hStub4)
+	tr.InsertRoute(mGET, "/articles/{id}:{op}", hStub3)
+	tr.InsertRoute(mGET, "/articles/{id}:{op}", hStub2)                              // this route sets a new handler for the above route
+	tr.InsertRoute(mGET, "/articles/{slug:^[a-z]+}/posts", hStub)                    // up to tail '/' will only match if contents match the rex
+	tr.InsertRoute(mGET, "/articles/{id}/posts/{pid}", hStub6)                       // /articles/123/posts/1
+	tr.InsertRoute(mGET, "/articles/{id}/posts/{month}/{day}/{year}/{slug}", hStub7) // /articles/123/posts/09/04/1984/juice
+	tr.InsertRoute(mGET, "/articles/{id}.json", hStub10)
+	tr.InsertRoute(mGET, "/articles/{id}/data.json", hStub11)
+	tr.InsertRoute(mGET, "/articles/files/{file}.{ext}", hStub12)
+	tr.InsertRoute(mPUT, "/articles/me", hStub13)
+
+	// TODO: make a separate test case for this one..
+	// tr.InsertRoute(mGET, "/articles/{id}/{id}", hStub1)                              // panic expected, we're duplicating param keys
+
+	tr.InsertRoute(mGET, "/pages/*ff", hStub) // TODO: panic, allow it..?
+	tr.InsertRoute(mGET, "/pages/*", hStub9)
+
+	tr.InsertRoute(mGET, "/users/{id}", hStub14)
+	tr.InsertRoute(mGET, "/users/{id}/settings/{key}", hStub15)
+	tr.InsertRoute(mGET, "/users/{id}/settings/*", hStub16)
+
+	tests := []struct {
+		m methodTyp    // input request http method
+		r string       // input request path
+		h http.Handler // output matched handler
+		k []string     // output param keys
+		v []string     // output param values
+	}{
+		{m: mGET, r: "/articles/search", h: hStub1, k: []string{}, v: []string{}},
+		{m: mGET, r: "/articlefun", h: hStub5, k: []string{}, v: []string{}},
+		{m: mGET, r: "/articles/123", h: hStub, k: []string{"id"}, v: []string{"123"}},
+		{m: mDELETE, r: "/articles/123mm", h: hStub8, k: []string{"slug"}, v: []string{"123mm"}},
+		{m: mGET, r: "/articles/789:delete", h: hStub8, k: []string{"id"}, v: []string{"789"}},
+		{m: mGET, r: "/articles/789!sup", h: hStub4, k: []string{"iidd"}, v: []string{"789"}},
+		{m: mGET, r: "/articles/123:sync", h: hStub2, k: []string{"id", "op"}, v: []string{"123", "sync"}},
+		{m: mGET, r: "/articles/456/posts/1", h: hStub6, k: []string{"id", "pid"}, v: []string{"456", "1"}},
+		{m: mGET, r: "/articles/456/posts/09/04/1984/juice", h: hStub7, k: []string{"id", "month", "day", "year", "slug"}, v: []string{"456", "09", "04", "1984", "juice"}},
+		{m: mGET, r: "/articles/456.json", h: hStub10, k: []string{"id"}, v: []string{"456"}},
+		{m: mGET, r: "/articles/456/data.json", h: hStub11, k: []string{"id"}, v: []string{"456"}},
+
+		{m: mGET, r: "/articles/files/file.zip", h: hStub12, k: []string{"file", "ext"}, v: []string{"file", "zip"}},
+		{m: mGET, r: "/articles/files/photos.tar.gz", h: hStub12, k: []string{"file", "ext"}, v: []string{"photos", "tar.gz"}},
+		{m: mGET, r: "/articles/files/photos.tar.gz", h: hStub12, k: []string{"file", "ext"}, v: []string{"photos", "tar.gz"}},
+
+		{m: mPUT, r: "/articles/me", h: hStub13, k: []string{}, v: []string{}},
+		{m: mGET, r: "/articles/me", h: hStub, k: []string{"id"}, v: []string{"me"}},
+		{m: mGET, r: "/pages", h: nil, k: []string{}, v: []string{}},
+		{m: mGET, r: "/pages/", h: hStub9, k: []string{"*"}, v: []string{""}},
+		{m: mGET, r: "/pages/yes", h: hStub9, k: []string{"*"}, v: []string{"yes"}},
+
+		{m: mGET, r: "/users/1", h: hStub14, k: []string{"id"}, v: []string{"1"}},
+		{m: mGET, r: "/users/", h: nil, k: []string{}, v: []string{}},
+		{m: mGET, r: "/users/2/settings/password", h: hStub15, k: []string{"id", "key"}, v: []string{"2", "password"}},
+		{m: mGET, r: "/users/2/settings/", h: hStub16, k: []string{"id", "*"}, v: []string{"2", ""}},
+	}
+
+	// log.Println("~~~~~~~~~")
+	// log.Println("~~~~~~~~~")
+	// debugPrintTree(0, 0, tr, 0)
+	// log.Println("~~~~~~~~~")
+	// log.Println("~~~~~~~~~")
+
+	for i, tt := range tests {
+		rctx := NewRouteContext()
+
+		_, handlers, _ := tr.FindRoute(rctx, tt.m, tt.r)
+
+		var handler http.Handler
+		if methodHandler, ok := handlers[tt.m]; ok {
+			handler = methodHandler.handler
+		}
+
+		paramKeys := rctx.routeParams.Keys
+		paramValues := rctx.routeParams.Values
+
+		if fmt.Sprintf("%v", tt.h) != fmt.Sprintf("%v", handler) {
+			t.Errorf("input [%d]: find '%s' expecting handler:%v , got:%v", i, tt.r, tt.h, handler)
+		}
+		if !stringSliceEqual(tt.k, paramKeys) {
+			t.Errorf("input [%d]: find '%s' expecting paramKeys:(%d)%v , got:(%d)%v", i, tt.r, len(tt.k), tt.k, len(paramKeys), paramKeys)
+		}
+		if !stringSliceEqual(tt.v, paramValues) {
+			t.Errorf("input [%d]: find '%s' expecting paramValues:(%d)%v , got:(%d)%v", i, tt.r, len(tt.v), tt.v, len(paramValues), paramValues)
+		}
+	}
+}
+
+func TestTreeRegexp(t *testing.T) {
+	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub3 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub4 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub5 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub6 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub7 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	tr := &node{}
+	tr.InsertRoute(mGET, "/articles/{rid:^[0-9]{5,6}}", hStub7)
+	tr.InsertRoute(mGET, "/articles/{zid:^0[0-9]+}", hStub3)
+	tr.InsertRoute(mGET, "/articles/{name:^@[a-z]+}/posts", hStub4)
+	tr.InsertRoute(mGET, "/articles/{op:^[0-9]+}/run", hStub5)
+	tr.InsertRoute(mGET, "/articles/{id:^[0-9]+}", hStub1)
+	tr.InsertRoute(mGET, "/articles/{id:^[1-9]+}-{aux}", hStub6)
+	tr.InsertRoute(mGET, "/articles/{slug}", hStub2)
+
+	// log.Println("~~~~~~~~~")
+	// log.Println("~~~~~~~~~")
+	// debugPrintTree(0, 0, tr, 0)
+	// log.Println("~~~~~~~~~")
+	// log.Println("~~~~~~~~~")
+
+	tests := []struct {
+		r string       // input request path
+		h http.Handler // output matched handler
+		k []string     // output param keys
+		v []string     // output param values
+	}{
+		{r: "/articles", h: nil, k: []string{}, v: []string{}},
+		{r: "/articles/12345", h: hStub7, k: []string{"rid"}, v: []string{"12345"}},
+		{r: "/articles/123", h: hStub1, k: []string{"id"}, v: []string{"123"}},
+		{r: "/articles/how-to-build-a-router", h: hStub2, k: []string{"slug"}, v: []string{"how-to-build-a-router"}},
+		{r: "/articles/0456", h: hStub3, k: []string{"zid"}, v: []string{"0456"}},
+		{r: "/articles/@pk/posts", h: hStub4, k: []string{"name"}, v: []string{"@pk"}},
+		{r: "/articles/1/run", h: hStub5, k: []string{"op"}, v: []string{"1"}},
+		{r: "/articles/1122", h: hStub1, k: []string{"id"}, v: []string{"1122"}},
+		{r: "/articles/1122-yes", h: hStub6, k: []string{"id", "aux"}, v: []string{"1122", "yes"}},
+	}
+
+	for i, tt := range tests {
+		rctx := NewRouteContext()
+
+		_, handlers, _ := tr.FindRoute(rctx, mGET, tt.r)
+
+		var handler http.Handler
+		if methodHandler, ok := handlers[mGET]; ok {
+			handler = methodHandler.handler
+		}
+
+		paramKeys := rctx.routeParams.Keys
+		paramValues := rctx.routeParams.Values
+
+		if fmt.Sprintf("%v", tt.h) != fmt.Sprintf("%v", handler) {
+			t.Errorf("input [%d]: find '%s' expecting handler:%v , got:%v", i, tt.r, tt.h, handler)
+		}
+		if !stringSliceEqual(tt.k, paramKeys) {
+			t.Errorf("input [%d]: find '%s' expecting paramKeys:(%d)%v , got:(%d)%v", i, tt.r, len(tt.k), tt.k, len(paramKeys), paramKeys)
+		}
+		if !stringSliceEqual(tt.v, paramValues) {
+			t.Errorf("input [%d]: find '%s' expecting paramValues:(%d)%v , got:(%d)%v", i, tt.r, len(tt.v), tt.v, len(paramValues), paramValues)
+		}
+	}
+}
+
+func TestTreeRegexMatchWholeParam(t *testing.T) {
+	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	rctx := NewRouteContext()
+	tr := &node{}
+	tr.InsertRoute(mGET, "/{id:[0-9]+}", hStub1)
+
+	tests := []struct {
+		url             string
+		expectedHandler http.Handler
+	}{
+		{url: "/13", expectedHandler: hStub1},
+		{url: "/a13", expectedHandler: nil},
+		{url: "/13.jpg", expectedHandler: nil},
+		{url: "/a13.jpg", expectedHandler: nil},
+	}
+
+	for _, tc := range tests {
+		_, _, handler := tr.FindRoute(rctx, mGET, tc.url)
+		if fmt.Sprintf("%v", tc.expectedHandler) != fmt.Sprintf("%v", handler) {
+			t.Errorf("expecting handler:%v , got:%v", tc.expectedHandler, handler)
+		}
+	}
+}
+
+func TestTreeFindPattern(t *testing.T) {
+	hStub1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	hStub3 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	tr := &node{}
+	tr.InsertRoute(mGET, "/pages/*", hStub1)
+	tr.InsertRoute(mGET, "/articles/{id}/*", hStub2)
+	tr.InsertRoute(mGET, "/articles/{slug}/{uid}/*", hStub3)
+
+	if tr.findPattern("/pages") != false {
+		t.Errorf("find /pages failed")
+	}
+	if tr.findPattern("/pages*") != false {
+		t.Errorf("find /pages* failed - should be nil")
+	}
+	if tr.findPattern("/pages/*") == false {
+		t.Errorf("find /pages/* failed")
+	}
+	if tr.findPattern("/articles/{id}/*") == false {
+		t.Errorf("find /articles/{id}/* failed")
+	}
+	if tr.findPattern("/articles/{something}/*") == false {
+		t.Errorf("find /articles/{something}/* failed")
+	}
+	if tr.findPattern("/articles/{slug}/{uid}/*") == false {
+		t.Errorf("find /articles/{slug}/{uid}/* failed")
 	}
 }
 
 func debugPrintTree(parent int, i int, n *node, label byte) bool {
 	numEdges := 0
-	for _, edges := range n.edges {
-		numEdges += len(edges)
+	for _, nds := range n.children {
+		numEdges += len(nds)
 	}
 
-	if n.handler != nil {
-		log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s numEdges:%d isLeaf:%v handler:%v\n", i, parent, n.typ, n.prefix, string(label), numEdges, n.isLeaf(), n.handler)
+	// if n.handlers != nil {
+	// 	log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s tail:%s numEdges:%d isLeaf:%v handler:%v pat:%s keys:%v\n", i, parent, n.typ, n.prefix, string(label), string(n.tail), numEdges, n.isLeaf(), n.handlers, n.pattern, n.paramKeys)
+	// } else {
+	// 	log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s tail:%s numEdges:%d isLeaf:%v pat:%s keys:%v\n", i, parent, n.typ, n.prefix, string(label), string(n.tail), numEdges, n.isLeaf(), n.pattern, n.paramKeys)
+	// }
+	if n.endpoints != nil {
+		log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s tail:%s numEdges:%d isLeaf:%v handler:%v\n", i, parent, n.typ, n.prefix, string(label), string(n.tail), numEdges, n.isLeaf(), n.endpoints)
 	} else {
-		log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s numEdges:%d isLeaf:%v\n", i, parent, n.typ, n.prefix, string(label), numEdges, n.isLeaf())
+		log.Printf("[node %d parent:%d] typ:%d prefix:%s label:%s tail:%s numEdges:%d isLeaf:%v\n", i, parent, n.typ, n.prefix, string(label), string(n.tail), numEdges, n.isLeaf())
 	}
-
 	parent = i
-	for _, edges := range n.edges {
-		for _, e := range edges {
+	for _, nds := range n.children {
+		for _, e := range nds {
 			i++
-			if debugPrintTree(parent, i, e.node, e.label) {
+			if debugPrintTree(parent, i, e, e.label) {
 				return true
 			}
 		}
@@ -178,48 +416,52 @@ func debugPrintTree(parent int, i int, n *node, label byte) bool {
 	return false
 }
 
-func BenchmarkTreeGet(b *testing.B) {
-	h1 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-	h2 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
+func stringSliceEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if b[i] != a[i] {
+			return false
+		}
+	}
+	return true
+}
 
-	tr := &tree{root: &node{}}
-	tr.Insert("/", h1)
-	tr.Insert("/ping", h2)
-	tr.Insert("/pingall", h2)
-	tr.Insert("/ping/:id", h2)
-	tr.Insert("/ping/:id/woop", h2)
-	tr.Insert("/ping/:id/:opt", h2)
-	tr.Insert("/pinggggg", h2)
-	tr.Insert("/hello", h1)
+func BenchmarkTreeGet(b *testing.B) {
+	h1 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+	h2 := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+
+	tr := &node{}
+	tr.InsertRoute(mGET, "/", h1)
+	tr.InsertRoute(mGET, "/ping", h2)
+	tr.InsertRoute(mGET, "/pingall", h2)
+	tr.InsertRoute(mGET, "/ping/{id}", h2)
+	tr.InsertRoute(mGET, "/ping/{id}/woop", h2)
+	tr.InsertRoute(mGET, "/ping/{id}/{opt}", h2)
+	tr.InsertRoute(mGET, "/pinggggg", h2)
+	tr.InsertRoute(mGET, "/hello", h1)
+
+	mctx := NewRouteContext()
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		// params := map[string]string{}
-		mctx := NewContext()
-		tr.Find(mctx, "/ping/123/456")
-		// tr.Find("/pingggg", params)
+		mctx.Reset()
+		tr.FindRoute(mctx, mGET, "/ping/123/456")
 	}
 }
 
-// func BenchmarkMuxGet(b *testing.B) {
-// 	h1 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-// 	h2 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-// 	h3 := HandlerFunc(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {})
-//
-// 	mx := NewRouter()
-// 	mx.Get("/", h1)
-// 	mx.Get("/hi", h2)
-// 	mx.Get("/sup/:id/and/:this", h3)
-//
-// 	w := new(mockResponseWriter)
-// 	r, _ := http.NewRequest("GET", "/sup/123/and/this", nil)
-//
-// 	b.ReportAllocs()
-// 	b.ResetTimer()
-//
-// 	for i := 0; i < b.N; i++ {
-// 		mx.ServeHTTP(w, r)
-// 	}
-// }
+func TestWalker(t *testing.T) {
+	r := bigMux()
+
+	// Walk the muxBig router tree.
+	if err := Walk(r, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		t.Logf("%v %v", method, route)
+
+		return nil
+	}); err != nil {
+		t.Error(err)
+	}
+}

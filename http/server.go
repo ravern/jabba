@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -41,15 +40,16 @@ func (s *Server) Router() chi.Router {
 		middleware.ErrorPage(http.StatusInternalServerError, internalServerError),
 	)
 
-	// Mount main routes
-	r.Get("/", s.Root)
-
 	// Mount assets
 	fileServer(r, "/public", assets)
 
+	// Mount link routes
+	r.Get("/", s.Index)
+	r.Get("/{slug}", s.Redirect)
+
 	// Override not found handler to prevent "404 page not found" from
 	// being sent in the response.
-	r.NotFound(func(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	})
 
@@ -71,7 +71,7 @@ func fileServer(r chi.Router, path string, root http.FileSystem) {
 	}
 	path += "*"
 
-	r.Get(path, middleware.Neuter(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	r.With(middleware.Neuter).Get(path, func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
-	})))
+	})
 }
