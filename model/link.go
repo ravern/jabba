@@ -9,6 +9,6 @@ import (
 type Link struct {
 	Slug    string
 	Title   string
-	URL     url.URL
+	URL     *url.URL
 	Created time.Time
 }
