@@ -1,8 +1,7 @@
 package bolt
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 
 	"github.com/boltdb/bolt"
@@ -19,12 +18,10 @@ func (d *Database) CreateUser(u *model.User) error {
 		}
 
 		username := []byte(u.Username)
-
-		var b bytes.Buffer
-		if err := gob.NewEncoder(&b).Encode(u); err != nil {
+		user, err := json.Marshal(u)
+		if err != nil {
 			return err
 		}
-		user := b.Bytes()
 
 		if users.Get(username) != nil {
 			return fmt.Errorf("bolt: user already exists")
@@ -62,8 +59,7 @@ func (d *Database) FetchUser(username string) (*model.User, error) {
 			return fmt.Errorf("bolt: user not found")
 		}
 
-		b := bytes.NewBuffer(user)
-		if err := gob.NewDecoder(b).Decode(&u); err != nil {
+		if err := json.Unmarshal(user, &u); err != nil {
 			return err
 		}
 

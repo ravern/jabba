@@ -1,8 +1,7 @@
 package bolt
 
 import (
-	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 
 	"github.com/boltdb/bolt"
@@ -19,12 +18,10 @@ func (d *Database) CreateLink(l *model.Link) error {
 		}
 
 		slug := []byte(l.Slug)
-
-		var b bytes.Buffer
-		if err := gob.NewEncoder(&b).Encode(l); err != nil {
+		link, err := json.Marshal(l)
+		if err != nil {
 			return err
 		}
-		link := b.Bytes()
 
 		if links.Get(link) != nil {
 			return fmt.Errorf("bolt: link already exists")
@@ -68,8 +65,7 @@ func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
 				continue
 			}
 
-			b := bytes.NewBuffer(link)
-			if err := gob.NewDecoder(b).Decode(&l); err != nil {
+			if err := json.Unmarshal(link, &l); err != nil {
 				d.Logger.WithFields(logrus.Fields{
 					"err": err,
 				}).Warn("bolt: failed to decode link")
@@ -105,8 +101,7 @@ func (d *Database) FetchLink(slug string) (*model.Link, error) {
 			return fmt.Errorf("bolt: link not found")
 		}
 
-		b := bytes.NewBuffer(link)
-		if err := gob.NewDecoder(b).Decode(&l); err != nil {
+		if err := json.Unmarshal(link, &l); err != nil {
 			return err
 		}
 

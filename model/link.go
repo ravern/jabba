@@ -7,8 +7,8 @@ import (
 
 // Link represents a shortened link.
 type Link struct {
-	Slug    string
-	Title   string
-	URL     *url.URL
-	Created time.Time
+	Slug    string    `json:"slug"`
+	Title   string    `json:"title"`
+	URL     *url.URL  `json:"url"`
+	Created time.Time `json:"created"`
 }
