@@ -14,30 +14,16 @@
                 </form>
             </div>
             <hr />
-            <div class="link">
-                    <a class="slug" href="#">ajghak</a>
-                    <span class="url">Refactor Procedure - Google Docs</span>
-                    <button class="button-primary">COPY</button>
-                    <button>EDIT</button>
-                    <button class="button-primary delete">DELETE</button>
-            </div>
-            <hr />
-            <div class="link">
-                    <a class="slug" href="#">cccade</a>
-                    <span class="url"></span>
-                    <button class="button-primary">COPY</button>
-                    <button>EDIT</button>
-                    <button class="button-primary delete">DELETE</button>
-            </div>
-            <hr />
-            <div class="link">
-                    <a class="slug" href="#">gkejte</a>
-                    <span class="url">Skeleton: Responsive CSS Boilerplate</span>
-                    <button class="button-primary">COPY</button>
-                    <button>EDIT</button>
-                    <button class="button-primary delete">DELETE</button>
-            </div>
-            <hr />
+            {{ range .Links }}
+                <div class="link">
+                        <a class="slug" href="/{{ .Slug }}">{{ .Slug }}</a>
+                        <span class="url">{{ .Title }}</span>
+                        <button class="button-primary">COPY</button>
+                        <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
+                        <button class="button-primary delete">DELETE</button>
+                </div>
+                <hr />
+            {{ end }}
         </div>
     </main>
 </div>

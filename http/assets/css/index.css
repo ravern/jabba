@@ -41,6 +41,22 @@ main .container {
     align-items: center;
 }
 
+/* Error */
+.error {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.error main {
+    flex: 1;
+}
+
+.error main .container {
+    height: 100%;
+    justify-content: center;
+}
+
 /* Index */
 .index main .hero {
     text-align: center;
@@ -87,6 +103,11 @@ main .container {
     text-overflow: ellipsis;
     overflow: hidden;
     min-width: 5.0rem;
+}
+
+.index main .link a {
+    margin-bottom: 0;
+    margin-right: 2.0rem;
 }
 
 .index main .link button {
