@@ -17,12 +17,7 @@ type Server struct {
 
 // Listen listens for requests, blocking until an error occurs.
 func (s *Server) Listen() error {
-	// This is a lie!
-	s.Logger.Infof("http: server listening on %s", s.Port)
-
-	err := http.ListenAndServe(s.Port, s.Router())
-	s.Logger.Error("http: server quit")
-	return err
+	return http.ListenAndServe(s.Port, s.Router())
 }
 
 // Router mounts all routes on a router and returns it.
@@ -32,12 +27,16 @@ func (s *Server) Router() chi.Router {
 	// Global middleware
 	r.Use(
 		// Logging
+		middleware.SetRequestID,
 		middleware.SetLogger(s.Logger),
 		middleware.LogRequest,
 
 		// Error pages
 		middleware.ErrorPage(http.StatusNotFound, notFound),
 		middleware.ErrorPage(http.StatusInternalServerError, internalServerError),
+
+		// Response
+		middleware.SetContentType("text/html; charset=utf-8"),
 	)
 
 	// Mount assets

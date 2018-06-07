@@ -32,13 +32,14 @@ func main() {
 
 	// Open the database connection
 	database := bolt.Database{
-		Path:   databasePath,
-		Logger: logger,
+		Path: databasePath,
 	}
 	if err := database.Open(); err != nil {
+		logger.Errorf("failed to open database at %s", databasePath)
 		os.Exit(1)
 	}
 	defer database.Close()
+	logger.Infof("opened database at %s", databasePath)
 
 	// Start up the server
 	server := http.Server{
@@ -46,7 +47,12 @@ func main() {
 		Logger:   logger,
 		Database: &database,
 	}
-	server.Listen()
+	// This is a lie!
+	logger.Infof("server started listening on %s", port)
+	err := server.Listen()
+	logger.WithFields(logrus.Fields{
+		"err": err,
+	}).Error("server quit")
 
 	// Always exit with an error code since a web server should technically
 	// run forever until an error occurs.

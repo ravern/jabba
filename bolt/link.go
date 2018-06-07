@@ -6,7 +6,6 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/ravernkoh/jabba/model"
-	"github.com/sirupsen/logrus"
 )
 
 // CreateLink creates a new link.
@@ -32,16 +31,6 @@ func (d *Database) CreateLink(l *model.Link) error {
 
 		return nil
 	})
-	if err == nil {
-		d.Logger.WithFields(logrus.Fields{
-			"slug": l.Slug,
-		}).Info("bolt: created link")
-	} else {
-		d.Logger.WithFields(logrus.Fields{
-			"slug": l.Slug,
-			"err":  err,
-		}).Warn("bolt: failed to create link")
-	}
 	return err
 }
 
@@ -59,16 +48,10 @@ func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
 
 			link := links.Get([]byte(slug))
 			if link == nil {
-				d.Logger.WithFields(logrus.Fields{
-					"slug": slug,
-				}).Warn("bolt: couldn't find link")
 				continue
 			}
 
 			if err := json.Unmarshal(link, &l); err != nil {
-				d.Logger.WithFields(logrus.Fields{
-					"err": err,
-				}).Warn("bolt: failed to decode link")
 				continue
 			}
 
@@ -77,13 +60,6 @@ func (d *Database) FetchLinks(u *model.User) ([]*model.Link, error) {
 
 		return nil
 	})
-	if err == nil {
-		d.Logger.Infof("bolt: fetched %d links", len(ll))
-	} else {
-		d.Logger.WithFields(logrus.Fields{
-			"err": err,
-		}).Info("bolt: failed to fetch links")
-	}
 	return ll, err
 }
 
@@ -107,15 +83,5 @@ func (d *Database) FetchLink(slug string) (*model.Link, error) {
 
 		return nil
 	})
-	if err == nil {
-		d.Logger.WithFields(logrus.Fields{
-			"slug": slug,
-		}).Info("bolt: fetched link")
-	} else {
-		d.Logger.WithFields(logrus.Fields{
-			"slug": slug,
-			"err":  err,
-		}).Warn("bolt: failed to fetch link")
-	}
 	return l, err
 }

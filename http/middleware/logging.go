@@ -4,16 +4,21 @@ import (
 	"context"
 	"net/http"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/go-chi/chi/middleware"
 	"github.com/sirupsen/logrus"
 )
 
+// SetRequestID sets the request ID in the context.
+var SetRequestID = middleware.RequestID
+
 // SetLogger sets the logger in the context.
+//
+// This should be used in conjunction with SetRequestID.
 func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			l = l.WithFields(logrus.Fields{
-				"request_id": uuid.NewV4(),
+				"request_id": r.Context().Value(middleware.RequestIDKey),
 				"path":       r.URL.Path,
 			})
 			ctx := context.WithValue(r.Context(), keyLogger, l)
@@ -37,7 +42,7 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rw := responseWriter{w: w}
 		l := Logger(r)
-		l.Info("http: received request")
+		l.Info("received request")
 
 		next.ServeHTTP(&rw, r)
 
@@ -45,9 +50,9 @@ func LogRequest(next http.Handler) http.Handler {
 			"status_code": rw.statusCode,
 		})
 		if rw.statusCode >= http.StatusInternalServerError {
-			l.Error("http: responded to request")
+			l.Error("responded to request")
 		} else {
-			l.Info("http: responded to request")
+			l.Info("responded to request")
 		}
 	})
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/boltdb/bolt"
 	"github.com/ravernkoh/jabba/model"
-	"github.com/sirupsen/logrus"
 )
 
 // CreateUser creates a new user.
@@ -32,16 +31,6 @@ func (d *Database) CreateUser(u *model.User) error {
 
 		return nil
 	})
-	if err == nil {
-		d.Logger.WithFields(logrus.Fields{
-			"username": u.Username,
-		}).Info("bolt: created user")
-	} else {
-		d.Logger.WithFields(logrus.Fields{
-			"username": u.Username,
-			"err":      err,
-		}).Warn("bolt: failed to create user")
-	}
 	return err
 }
 
@@ -65,15 +54,5 @@ func (d *Database) FetchUser(username string) (*model.User, error) {
 
 		return nil
 	})
-	if err == nil {
-		d.Logger.WithFields(logrus.Fields{
-			"username": username,
-		}).Info("bolt: fetched user")
-	} else {
-		d.Logger.WithFields(logrus.Fields{
-			"username": username,
-			"err":      err,
-		}).Warn("bolt: failed to fetch user")
-	}
 	return u, err
 }

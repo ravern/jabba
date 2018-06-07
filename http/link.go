@@ -4,23 +4,37 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/sirupsen/logrus"
 
+	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/ravernkoh/jabba/model"
 )
 
 // Index renders the index page.
 func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
-	user, err := s.Database.FetchUser("johnsmith")
+	logger := middleware.Logger(r)
+
+	username := "johnsmith"
+	user, err := s.Database.FetchUser(username)
 	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"username": username,
+			"err":      err,
+		}).Error("failed to fetch user")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	logger.WithFields(logrus.Fields{
+		"username": username,
+	}).Info("fetched user")
 
 	links, err := s.Database.FetchLinks(user)
 	if err != nil {
+		logger.Error("failed to fetch links")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	logger.Info("fetched links")
 
 	executeTemplate(w, "layout.html", nil, "index.html", struct {
 		Links []*model.Link
