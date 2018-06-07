@@ -1,7 +1,6 @@
 package model
 
 import (
-	"net/url"
 	"time"
 )
 
@@ -9,6 +8,6 @@ import (
 type Link struct {
 	Slug    string    `json:"slug"`
 	Title   string    `json:"title"`
-	URL     *url.URL  `json:"url"`
+	URL     string    `json:"url"`
 	Created time.Time `json:"created"`
 }

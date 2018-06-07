@@ -20,6 +20,7 @@ func main() {
 	// Get environment variables
 	var (
 		development  = os.Getenv("DEVELOPMENT") != ""
+		hostname     = os.Getenv("HOSTNAME")
 		port         = os.Getenv("PORT")
 		databasePath = os.Getenv("DATABASE_PATH")
 	)
@@ -44,6 +45,7 @@ func main() {
 	// Start up the server
 	server := http.Server{
 		Port:     port,
+		Hostname: hostname,
 		Logger:   logger,
 		Database: &database,
 	}

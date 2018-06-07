@@ -36,11 +36,15 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Info("fetched links")
 
-	executeTemplate(w, "layout.html", nil, "index.html", struct {
-		Links []*model.Link
+	if err := executeTemplate(w, "layout.html", nil, "index.html", struct {
+		Hostname string
+		Links    []*model.Link
 	}{
-		Links: links,
-	})
+		Hostname: s.Hostname,
+		Links:    links,
+	}); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // Redirect redirects to the corresponding page from the slug.
@@ -52,5 +56,5 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, link.URL.String(), http.StatusFound)
+	http.Redirect(w, r, link.URL, http.StatusFound)
 }

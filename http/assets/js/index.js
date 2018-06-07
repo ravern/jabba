@@ -9,7 +9,7 @@ function copy(elem, text) {
     tmp.remove();
 
     // Update the element and reset after a while.
-    const text = elem.text();
+    text = elem.text();
     const backgroundColor = elem.css('background-color');
 
     elem.text('COPIED').css({

@@ -11,6 +11,7 @@ import (
 // Server serves the website.
 type Server struct {
 	Port     string
+	Hostname string
 	Logger   logrus.FieldLogger
 	Database Database
 }
