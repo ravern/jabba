@@ -36,7 +36,7 @@ func (d *Database) CreateUser(u *model.User) error {
 	})
 }
 
-// GetUser returns a user with the given username.
+// GetUser returns the user with the given username.
 func (d *Database) GetUser(username string) (*model.User, error) {
 	var u *model.User
 	err := d.db.View(func(tx *bolt.Tx) error {

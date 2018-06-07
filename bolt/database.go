@@ -4,17 +4,20 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/sirupsen/logrus"
 )
 
 // Bucket names.
 const (
 	usersBucket = "Users"
+	linksBucket = "Links"
 )
 
 // Database represents the database connection.
 type Database struct {
-	Path string
-	db   *bolt.DB
+	Path   string
+	Logger logrus.FieldLogger
+	db     *bolt.DB
 }
 
 // Open opens up a connection to the database.

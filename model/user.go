@@ -4,8 +4,9 @@ import "time"
 
 // User represents a user.
 type User struct {
-	Username string
-	Email    string
-	Password string
-	Joined   time.Time
+	Username  string
+	Email     string
+	Password  string
+	Joined    time.Time
+	LinkSlugs []string
 }
