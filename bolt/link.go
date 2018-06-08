@@ -88,6 +88,30 @@ func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
 	})
 }
 
+// IncrementLinkCount increments the visit count of the given link.
+func (d *Database) IncrementLinkCount(l *model.Link) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
+		if err != nil {
+			return err
+		}
+
+		l.Count++
+
+		slug := []byte(l.Slug)
+		link, err := json.Marshal(l)
+		if err != nil {
+			return err
+		}
+
+		if err := links.Put(slug, link); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 // FetchLinks returns the links with the given slugs.
 func (d *Database) FetchLinks(slugs []string) ([]*model.Link, error) {
 	var ll []*model.Link

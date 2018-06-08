@@ -21,6 +21,7 @@
             {{ range .Links }}
                 <div class="link">
                         <a class="slug" href="{{ .URL }}">{{ .Slug }}</a>
+                        <span class="count">{{ .Count }}</span>
                         <span class="url">{{ .Title }}</span>
                         <button
                             class="button-primary"

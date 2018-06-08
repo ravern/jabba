@@ -60,6 +60,12 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := s.Database.IncrementLinkCount(link); err != nil {
+		middleware.Logger(r).WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("failed to increment link count")
+	}
+
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }
 

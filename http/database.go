@@ -9,6 +9,7 @@ type Database interface {
 
 	CreateUserLink(*model.Link, *model.User) error
 	CreateVisitorLink(*model.Link, *model.Visitor) error
+	IncrementLinkCount(*model.Link) error
 	FetchLinks(slugs []string) ([]*model.Link, error)
 	FetchLink(slug string) (*model.Link, error)
 

@@ -19,6 +19,7 @@ type Link struct {
 	Title   string    `json:"title"`
 	URL     string    `json:"url"`
 	Created time.Time `json:"created"`
+	Count   int       `json:"count"`
 }
 
 // NewLink creates a new link with the given URL.
