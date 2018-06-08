@@ -126,8 +126,13 @@ main .container {
     margin-right: 2.0rem;
 }
 
-.index main .link button.delete {
+.index main .link form {
+    margin-bottom: 0;
+}
+
+.index main .link form .delete {
     margin-right: 0;
+    margin-bottom: 0;
     background-color: #e33;
     border-color: #e33;
 }

@@ -21,3 +21,14 @@ func NewVisitor() *Visitor {
 		LinkSlugs: []string{},
 	}
 }
+
+// FindLinkSlug searches for a slug that belongs to the visitor and returns its
+// index and flag to indicate whether it exists.
+func (v *Visitor) FindLinkSlug(slug string) (int, bool) {
+	for i, s := range v.LinkSlugs {
+		if s == slug {
+			return i, true
+		}
+	}
+	return 0, false
+}

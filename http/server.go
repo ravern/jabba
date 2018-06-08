@@ -51,8 +51,10 @@ func (s *Server) Router() chi.Router {
 		)
 
 		r.Get("/", s.Index)
-		r.Get("/{slug}", s.Redirect)
-		r.Post("/", s.Shorten)
+		r.Post("/", s.ShortenURL)
+		r.Get("/{slug}", s.RedirectSlug)
+		// Forms don't support DELETE
+		r.Post("/{slug}/delete", s.DeleteLink)
 	})
 
 	// Override not found handler to prevent "404 page not found" from

@@ -88,9 +88,84 @@ func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
 	})
 }
 
+// DeleteUserLink deletes the link with the given slug and removes that link
+// from the user.
+func (d *Database) DeleteUserLink(slug string, u *model.User) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		links := tx.Bucket([]byte(linksBucket))
+		if links == nil {
+			return fmt.Errorf("bolt: links not found")
+		}
+
+		if err := links.Delete([]byte(slug)); err != nil {
+			return err
+		}
+
+		users := tx.Bucket([]byte(usersBucket))
+		if users == nil {
+			return fmt.Errorf("bolt: users not found")
+		}
+
+		i, ok := u.FindLinkSlug(slug)
+		if !ok {
+			return fmt.Errorf("bolt: link not found in user")
+		}
+		u.LinkSlugs = append(u.LinkSlugs[:i], u.LinkSlugs[i+1:]...)
+
+		user, err := json.Marshal(u)
+		if err != nil {
+			return err
+		}
+
+		if err := users.Put([]byte(u.Username), user); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+// DeleteVisitorLink deletes the link with the given slug and removes that link
+// from the visitor.
+func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		links := tx.Bucket([]byte(linksBucket))
+		if links == nil {
+			return fmt.Errorf("bolt: links not found")
+		}
+
+		if err := links.Delete([]byte(slug)); err != nil {
+			return err
+		}
+
+		visitors := tx.Bucket([]byte(visitorsBucket))
+		if visitors == nil {
+			return fmt.Errorf("bolt: visitors not found")
+		}
+
+		i, ok := v.FindLinkSlug(slug)
+		if !ok {
+			return fmt.Errorf("bolt: link not found in visitor")
+		}
+		v.LinkSlugs = append(v.LinkSlugs[:i], v.LinkSlugs[i+1:]...)
+
+		visitor, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+
+		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 // IncrementLinkCount increments the visit count of the given link.
 func (d *Database) IncrementLinkCount(l *model.Link) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	count := l.Count
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
 			return err
@@ -110,6 +185,10 @@ func (d *Database) IncrementLinkCount(l *model.Link) error {
 
 		return nil
 	})
+	if err != nil {
+		l.Count = count
+	}
+	return err
 }
 
 // FetchLinks returns the links with the given slugs.

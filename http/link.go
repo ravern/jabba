@@ -49,10 +49,10 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Redirect redirects to the corresponding page from the slug.
+// RedirectSlug redirects to the corresponding page from the slug.
 //
 // TODO: Add authentication
-func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
+func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	link, err := s.Database.FetchLink(slug)
 	if err != nil {
@@ -69,10 +69,10 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }
 
-// Shorten shortens the URL and creates the resulting link.
+// ShortenURL shortens the URL and creates the resulting link.
 //
 // TODO: Support both Visitor and User
-func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
 	visitor := s.Visitor(r)
 
@@ -100,6 +100,29 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	logrus.WithFields(logrus.Fields{
 		"slug": link.Slug,
 	}).Info("created link")
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// DeleteLink deletes the link.
+//
+// TODO: Support both Visitor and User
+func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
+	visitor := s.Visitor(r)
+
+	slug := chi.URLParam(r, "slug")
+
+	if err := s.Database.DeleteVisitorLink(slug, visitor); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to delete link")
+
+		setFlash(w, "Trying to delete invalid link!")
+
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }

@@ -29,7 +29,13 @@
                             onclick="copy($('#copy-{{ .Slug }}'), '{{ $hostname }}/{{ .Slug }}')"
                         >COPY</button>
                         <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
-                        <button class="button-primary delete">DELETE</button>
+                        <form
+                            action="/{{ .Slug }}/delete"
+                            method="POST"
+                            onsubmit="return confirm('Are you sure?');"
+                        >
+                            <input type="submit" value="DELETE" class="button-primary delete" />
+                        </form>
                 </div>
                 <hr />
             {{ end }}
