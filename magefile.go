@@ -27,12 +27,34 @@ func Production() error {
 	if err := sh.RunWith(map[string]string{
 		"GOOS":   "linux",
 		"GOARCH": "amd64",
-	}, "go", "build", "-o", "releases/jabba"); err != nil {
+	}, "go", "build", "-o", "releases/jabba", "./cmd/jabba"); err != nil {
 		return err
 	}
 
 	// Clean up static files
 	if err := sh.RunV("packr", "clean"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+const SSH = "ravernkoh@jabba.xyz"
+
+// Deploy copies the production binary onto the server
+func Deploy() error {
+	// Stop the running service
+	if err := sh.RunV("ssh", "-t", SSH, "sudo systemctl stop jabba"); err != nil {
+		return err
+	}
+
+	// Copy it onto the server
+	if err := sh.RunV("scp", "releases/jabba", SSH+":~/jabba/jabba"); err != nil {
+		return err
+	}
+
+	// Start the service
+	if err := sh.RunV("ssh", "-t", SSH, "sudo systemctl start jabba"); err != nil {
 		return err
 	}
 
