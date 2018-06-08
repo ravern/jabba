@@ -32,10 +32,10 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		"token": visitor.Token,
 	}).Info("fetched links of visitor")
 
-	flash, _ := flash(w, r)
+	flash, _ := RetrieveFlash(w, r)
 
 	if err := executeTemplate(w, "layout.html", nil, "index.html", struct {
-		Flash    string
+		Flash    Flash
 		Hostname string
 		Links    []*model.Link
 	}{
@@ -52,8 +52,6 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // RedirectSlug redirects to the corresponding page from the slug.
-//
-// TODO: Add authentication
 func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	link, err := s.Database.FetchLink(slug)
@@ -85,7 +83,8 @@ func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Error("failed to create link")
 
-		setFlash(w, "Invalid URL given!")
+		f := Flash{Failure: "Invalid URL given."}
+		f.Save(w)
 
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
@@ -122,7 +121,8 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 
 		switch err.(errors.Error).Type {
 		case errors.Unauthorized:
-			setFlash(w, "You can't delete the link!")
+			f := Flash{Failure: "You can't delete the link!"}
+			f.Save(w)
 			http.Redirect(w, r, "/", http.StatusFound)
 		default:
 			w.WriteHeader(http.StatusInternalServerError)

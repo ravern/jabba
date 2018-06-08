@@ -5,25 +5,50 @@ import (
 	"time"
 )
 
-// setFlash sets the flash to be used on the next request.
-func setFlash(w http.ResponseWriter, flash string) {
-	http.SetCookie(w, &http.Cookie{
-		Name:  "flash",
-		Value: flash,
-	})
+// Flash is the flash stored in the cookie.
+type Flash struct {
+	Success string
+	Failure string
 }
 
-// flash returns the flash saved in the cookie, removing it in the process.
-func flash(w http.ResponseWriter, r *http.Request) (string, error) {
-	c, err := r.Cookie("flash")
-	if err != nil {
-		return "", err
-	}
+// Save sets the flash in the cookie to be used on the next request.
+func (f Flash) Save(w http.ResponseWriter) error {
+	http.SetCookie(w, &http.Cookie{
+		Name:  "flash-success",
+		Value: f.Success,
+	})
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "flash",
+		Name:  "flash-failure",
+		Value: f.Failure,
+	})
+
+	return nil
+}
+
+// RetrieveFlash retrieves the flash saved in the cookie and removes it.
+func RetrieveFlash(w http.ResponseWriter, r *http.Request) (Flash, error) {
+	var f Flash
+
+	c, err := r.Cookie("flash-success")
+	if err != nil {
+		return f, err
+	}
+	f.Success = c.Value
+	http.SetCookie(w, &http.Cookie{
+		Name:    "flash-success",
 		Expires: time.Unix(0, 0),
 	})
 
-	return c.Value, nil
+	c, err = r.Cookie("flash-failure")
+	if err != nil {
+		return f, err
+	}
+	f.Failure = c.Value
+	http.SetCookie(w, &http.Cookie{
+		Name:    "flash-failure",
+		Expires: time.Unix(0, 0),
+	})
+
+	return f, nil
 }

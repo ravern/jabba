@@ -9,9 +9,8 @@ p      { margin-bottom: 3.0rem; font-weight: normal; }
 hr     { margin-bottom: 1.0rem; margin-top: 0; width: 100%; }
 
 /* Flash */
-.flash {
-    color: #e33;
-}
+.flash.success { color: #3c3; }
+.flash.failure { color: #e33; }
 
 /* Header and navigation */
 header {

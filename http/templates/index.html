@@ -7,9 +7,7 @@
     <main>
         <div class="container">
             <div class="hero">
-                {{ if not (eq .Flash "") }}
-                    <p class="flash">{{ .Flash }}</p>
-                {{ end }}
+                {{ template "partials/flash.html" . }}
                 <h3>Jabba</h3>
                 <p>Fast and simple link shortener with cool features!</p>
                 <form method="POST">

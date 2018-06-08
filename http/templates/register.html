@@ -7,9 +7,7 @@
     <main>
         <div class="container">
             <h3>Register</h3>
-            {{ if not (eq .Flash "") }}
-                <p class="flash">{{ .Flash }}</p>
-            {{ end }}
+            {{ template "partials/flash.html" . }}
             <form method="POST">
                 <div class="input">
                     <input type="text" placeholder="Username" name="username" />

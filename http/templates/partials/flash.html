@@ -1,0 +1,6 @@
+{{ if not (eq .Flash.Success "") }}
+    <p class="flash success">{{ .Flash.Success }}</p>
+{{ end }}
+{{ if not (eq .Flash.Failure "") }}
+    <p class="flash failure">{{ .Flash.Failure }}</p>
+{{ end }}
