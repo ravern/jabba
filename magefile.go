@@ -44,7 +44,7 @@ const SSH = "ravernkoh@jabba.xyz"
 // Deploy copies the production binary onto the server
 func Deploy() error {
 	// Stop the running service
-	if err := sh.RunV("ssh", "-t", SSH, "sudo systemctl stop jabba"); err != nil {
+	if err := sh.RunV("ssh", SSH, "sudo systemctl stop jabba"); err != nil {
 		return err
 	}
 
@@ -54,7 +54,7 @@ func Deploy() error {
 	}
 
 	// Start the service
-	if err := sh.RunV("ssh", "-t", SSH, "sudo systemctl start jabba"); err != nil {
+	if err := sh.RunV("ssh", SSH, "sudo systemctl start jabba"); err != nil {
 		return err
 	}
 
