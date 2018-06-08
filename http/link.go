@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
 
+	"github.com/ravernkoh/jabba/errors"
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/ravernkoh/jabba/model"
 )
@@ -24,6 +25,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 			"token": visitor.Token,
 			"err":   err,
 		}).Error("failed to fetch links of visitor")
+
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -45,6 +47,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to execute template")
+
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -118,9 +121,14 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Error("failed to delete link")
 
-		setFlash(w, "Trying to delete invalid link!")
+		switch err.(errors.Error).Type {
+		case errors.Unauthorized:
+			setFlash(w, "You can't delete the link!")
+			http.Redirect(w, r, "/", http.StatusFound)
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
-		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 

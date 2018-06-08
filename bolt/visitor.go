@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/boltdb/bolt"
+	"github.com/ravernkoh/jabba/errors"
 	"github.com/ravernkoh/jabba/model"
 )
 
@@ -13,17 +14,26 @@ func (d *Database) PutVisitor(v *model.Visitor) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		visitors, err := tx.CreateBucketIfNotExists([]byte(visitorsBucket))
 		if err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.NotFound,
+				Message: "bolt: failed to find visitors bucket",
+			}
 		}
 
 		token := []byte(v.Token)
 		visitor, err := json.Marshal(v)
 		if err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedMarshal,
+				Message: fmt.Sprintf("bolt: failed to marshal visitor: %v", err),
+			}
 		}
 
 		if err := visitors.Put(token, visitor); err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedPut,
+				Message: "bolt: failed to update visitor",
+			}
 		}
 
 		return nil
@@ -36,16 +46,25 @@ func (d *Database) FetchVisitor(token string) (*model.Visitor, error) {
 	err := d.db.View(func(tx *bolt.Tx) error {
 		visitors := tx.Bucket([]byte(visitorsBucket))
 		if visitors == nil {
-			return fmt.Errorf("bolt: users not found")
+			return errors.Error{
+				Type:    errors.NotFound,
+				Message: "bolt: failed to find visitors bucket",
+			}
 		}
 
 		visitor := visitors.Get([]byte(token))
 		if visitor == nil {
-			return fmt.Errorf("bolt: user not found")
+			return errors.Error{
+				Type:    errors.NotFound,
+				Message: "bolt: failed to find visitor",
+			}
 		}
 
 		if err := json.Unmarshal(visitor, &v); err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedMarshal,
+				Message: fmt.Sprintf("bolt: failed to unmarshal visitor: %v", err),
+			}
 		}
 
 		return nil

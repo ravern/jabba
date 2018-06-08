@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/boltdb/bolt"
+	"github.com/ravernkoh/jabba/errors"
 	"github.com/ravernkoh/jabba/model"
 )
 
@@ -13,20 +14,32 @@ func (d *Database) CreateUser(u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		users, err := tx.CreateBucketIfNotExists([]byte(usersBucket))
 		if err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedPut,
+				Message: "bolt: failed to create users bucket",
+			}
 		}
 
 		username := []byte(u.Username)
 		user, err := json.Marshal(u)
 		if err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedMarshal,
+				Message: fmt.Sprintf("bolt: failed to marshal user: %v", err),
+			}
 		}
 
 		if users.Get(username) != nil {
-			return fmt.Errorf("bolt: user already exists")
+			return errors.Error{
+				Type:    errors.AlreadyExists,
+				Message: "bolt: user already exists",
+			}
 		}
 		if err := users.Put(username, user); err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedPut,
+				Message: "bolt: failed to create user",
+			}
 		}
 
 		return nil
@@ -39,16 +52,25 @@ func (d *Database) FetchUser(username string) (*model.User, error) {
 	err := d.db.View(func(tx *bolt.Tx) error {
 		users := tx.Bucket([]byte(usersBucket))
 		if users == nil {
-			return fmt.Errorf("bolt: users not found")
+			return errors.Error{
+				Type:    errors.NotFound,
+				Message: "bolt: failed to find users bucket",
+			}
 		}
 
 		user := users.Get([]byte(username))
 		if user == nil {
-			return fmt.Errorf("bolt: user not found")
+			return errors.Error{
+				Type:    errors.NotFound,
+				Message: "bolt: failed to find user",
+			}
 		}
 
 		if err := json.Unmarshal(user, &u); err != nil {
-			return err
+			return errors.Error{
+				Type:    errors.FailedMarshal,
+				Message: fmt.Sprintf("bolt: failed to unmarshal user: %v", err),
+			}
 		}
 
 		return nil
