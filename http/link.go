@@ -31,13 +31,20 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		"token": visitor.Token,
 	}).Info("fetched links of visitor")
 
+	flash, _ := flash(w, r)
+
 	if err := executeTemplate(w, "layout.html", nil, "index.html", struct {
+		Flash    string
 		Hostname string
 		Links    []*model.Link
 	}{
+		Flash:    flash,
 		Hostname: s.Hostname,
 		Links:    links,
 	}); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to execute template")
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
@@ -66,13 +73,15 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	url := r.FormValue("url")
 	link := model.NewLink(url)
 
-	if err := s.Database.CreateLink(link, visitor); err != nil {
+	if err := s.Database.CreateVisitorLink(link, visitor); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to create link")
 
-		// TODO: Use flash to display error message
-		w.WriteHeader(http.StatusInternalServerError)
+		// TODO: Improve flash message
+		setFlash(w, "Failed to shorten link!")
+
+		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
 	logrus.WithFields(logrus.Fields{

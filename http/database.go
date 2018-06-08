@@ -7,8 +7,8 @@ type Database interface {
 	CreateUser(*model.User) error
 	FetchUser(username string) (*model.User, error)
 
-	// TODO: Change to CreateUserLink and CreateVisitorLink
-	CreateLink(*model.Link, *model.Visitor) error
+	CreateUserLink(*model.Link, *model.User) error
+	CreateVisitorLink(*model.Link, *model.Visitor) error
 	FetchLinks(slugs []string) ([]*model.Link, error)
 	FetchLink(slug string) (*model.Link, error)
 

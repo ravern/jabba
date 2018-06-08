@@ -19,7 +19,7 @@ type Link struct {
 // NewLink creates a new link with the given URL.
 //
 // TODO: Add checks for URL validity
-// TODO: Add automatic title generationh
+// TODO: Add automatic title generation
 func NewLink(url string) *Link {
 	// Generate the slug
 	slug := make([]rune, 6)

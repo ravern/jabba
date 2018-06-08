@@ -8,8 +8,48 @@ import (
 	"github.com/ravernkoh/jabba/model"
 )
 
-// CreateLink creates a new link.
-func (d *Database) CreateLink(l *model.Link, v *model.Visitor) error {
+// CreateUserLink creates a new link and adds that link to the user.
+func (d *Database) CreateUserLink(l *model.Link, u *model.User) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
+		if err != nil {
+			return err
+		}
+
+		slug := []byte(l.Slug)
+		link, err := json.Marshal(l)
+		if err != nil {
+			return err
+		}
+
+		if links.Get(link) != nil {
+			return fmt.Errorf("bolt: link already exists")
+		}
+		if err := links.Put(slug, link); err != nil {
+			return err
+		}
+
+		users := tx.Bucket([]byte(usersBucket))
+		if users == nil {
+			return fmt.Errorf("bolt: users not found")
+		}
+
+		u.LinkSlugs = append(u.LinkSlugs, l.Slug)
+		user, err := json.Marshal(u)
+		if err != nil {
+			return err
+		}
+
+		if err := users.Put([]byte(u.Username), user); err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+// CreateVisitorLink creates a new link and adds that link to the visitor.
+func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
