@@ -7,6 +7,9 @@
     <main>
         <div class="container">
             <h3>Register</h3>
+            {{ if not (eq .Flash "") }}
+                <p class="flash">{{ .Flash }}</p>
+            {{ end }}
             <form method="POST">
                 <div class="input">
                     <input type="text" placeholder="Username" name="username" />
@@ -18,7 +21,7 @@
                     <input type="password" placeholder="Password" name="password" />
                 </div>
                 <div class="input">
-                    <input type="password" placeholder="Confirm" name="confirm_password" />
+                    <input type="password" placeholder="Confirm password" name="confirm_password" />
                 </div>
                 <div class="input">
                     <input type="submit" value="REGISTER" />

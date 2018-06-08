@@ -35,7 +35,7 @@ func (d *Database) CreateUserLink(l *model.Link, u *model.User) error {
 
 		if err := users.Put([]byte(u.Username), user); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update user",
 			}
 		}
@@ -70,7 +70,7 @@ func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
 
 		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update visitor",
 			}
 		}
@@ -84,7 +84,7 @@ func createLink(tx *bolt.Tx, l *model.Link) error {
 	links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 	if err != nil {
 		return errors.Error{
-			Type:    errors.FailedPut,
+			Type:    errors.NotPut,
 			Message: "bolt: failed to create links bucket",
 		}
 	}
@@ -106,7 +106,7 @@ func createLink(tx *bolt.Tx, l *model.Link) error {
 	}
 	if err := links.Put(slug, link); err != nil {
 		return errors.Error{
-			Type:    errors.FailedPut,
+			Type:    errors.NotPut,
 			Message: "bolt: failed to create link",
 		}
 	}
@@ -149,7 +149,7 @@ func (d *Database) DeleteUserLink(slug string, u *model.User) error {
 
 		if err := users.Put([]byte(u.Username), user); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update user",
 			}
 		}
@@ -193,7 +193,7 @@ func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
 
 		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update visitor",
 			}
 		}
@@ -214,7 +214,7 @@ func deleteLink(tx *bolt.Tx, slug string) error {
 
 	if err := links.Delete([]byte(slug)); err != nil {
 		return errors.Error{
-			Type:    errors.FailedDelete,
+			Type:    errors.NotDeleted,
 			Message: "bolt: failed to delete link",
 		}
 	}
@@ -229,7 +229,7 @@ func (d *Database) IncrementLinkCount(l *model.Link) error {
 		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
 		if err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to create links bucket",
 			}
 		}
@@ -247,7 +247,7 @@ func (d *Database) IncrementLinkCount(l *model.Link) error {
 
 		if err := links.Put(slug, link); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update link",
 			}
 		}

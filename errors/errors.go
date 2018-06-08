@@ -12,10 +12,10 @@ type Type int
 // Possible types of errors.
 const (
 	NotFound Type = iota
+	NotPut
+	NotDeleted
 	Unauthorized
 	AlreadyExists
-	FailedPut
-	FailedDelete
 	FailedMarshal
 )
 

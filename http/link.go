@@ -15,7 +15,6 @@ import (
 //
 // TODO: Support both Visitor and User
 func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
-
 	logger := middleware.Logger(r)
 	visitor := s.Visitor(r)
 

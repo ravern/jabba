@@ -34,6 +34,10 @@ header nav .left a h5 {
     margin-bottom: 0;
 }
 
+header nav .right .login {
+    margin-right: 1.0rem;
+}
+
 header nav .right a.button {
     margin-bottom: 0;
 }
@@ -65,7 +69,8 @@ main .container {
 /* Index */
 .index main .hero {
     text-align: center;
-    padding: 5.0rem 0;
+    padding-top: 2.0rem;
+    margin-bottom: 2.0rem;
 }
 
 .index main .hero p {
@@ -140,4 +145,30 @@ main .container {
     margin-bottom: 0;
     background-color: #e33;
     border-color: #e33;
+}
+
+/* Login */
+.login main {
+    padding-top: 2.0rem;
+}
+
+.login main form {
+    text-align: center;
+}
+
+.login main form .input input {
+    width: 300px;
+}
+
+/* Register */
+.register main {
+    padding-top: 2.0rem;
+}
+
+.register main form {
+    text-align: center;
+}
+
+.register main form .input input {
+    width: 300px;
 }

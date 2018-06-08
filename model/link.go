@@ -26,6 +26,8 @@ type Link struct {
 //
 // Title generation is attempted, by visiting the URL and extracting the <title>.
 // The link will default to 'Untitled' if this does not succeed.
+//
+// TODO: Add validations
 func NewLink(rawURL string) (*Link, error) {
 	// Validate URL
 	if _, err := url.ParseRequestURI(rawURL); err != nil {

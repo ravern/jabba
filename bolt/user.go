@@ -15,7 +15,7 @@ func (d *Database) CreateUser(u *model.User) error {
 		users, err := tx.CreateBucketIfNotExists([]byte(usersBucket))
 		if err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to create users bucket",
 			}
 		}
@@ -37,7 +37,7 @@ func (d *Database) CreateUser(u *model.User) error {
 		}
 		if err := users.Put(username, user); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to create user",
 			}
 		}

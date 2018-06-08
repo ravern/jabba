@@ -20,6 +20,7 @@ func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 			l = l.WithFields(logrus.Fields{
 				"request_id": r.Context().Value(middleware.RequestIDKey),
 				"path":       r.URL.Path,
+				"method":     r.Method,
 			})
 			ctx := context.WithValue(r.Context(), keyLogger, l)
 

@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // User represents a registered user.
 type User struct {
@@ -9,6 +13,27 @@ type User struct {
 	Password  string    `json:"password"`
 	Joined    time.Time `json:"joined"`
 	LinkSlugs []string  `json:"link_slugs"`
+}
+
+// NewUser creates a new user.
+//
+// The given password will be hashed and stored in the password field.
+//
+// TODO: Add validations
+func NewUser(username string, email string, password string) (*User, error) {
+	// Hash the passwords (use default cost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
+	if err != nil {
+		return nil, err
+	}
+
+	return &User{
+		Username:  username,
+		Email:     email,
+		Password:  string(passwordHash),
+		Joined:    time.Now(),
+		LinkSlugs: []string{},
+	}, nil
 }
 
 // FindLinkSlug searches for a slug that belongs to the user and returns its

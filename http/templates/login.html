@@ -7,6 +7,9 @@
     <main>
         <div class="container">
             <h3>Login</h3>
+            {{ if not (eq .Flash "") }}
+                <p class="flash">{{ .Flash }}</p>
+            {{ end }}
             <form method="POST">
                 <div class="input">
                     <input type="text" placeholder="Username" name="username" />

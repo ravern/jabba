@@ -31,7 +31,7 @@ func (d *Database) PutVisitor(v *model.Visitor) error {
 
 		if err := visitors.Put(token, visitor); err != nil {
 			return errors.Error{
-				Type:    errors.FailedPut,
+				Type:    errors.NotPut,
 				Message: "bolt: failed to update visitor",
 			}
 		}

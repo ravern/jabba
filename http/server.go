@@ -57,6 +57,14 @@ func (s *Server) Router() chi.Router {
 		r.Post("/{slug}/delete", s.DeleteLink)
 	})
 
+	// Mount user routes
+	r.Group(func(r chi.Router) {
+		r.Get("/login", s.LoginForm)
+		r.Post("/login", s.Login)
+		r.Get("/register", s.RegisterForm)
+		r.Post("/register", s.Register)
+	})
+
 	// Override not found handler to prevent "404 page not found" from
 	// being sent in the response.
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
