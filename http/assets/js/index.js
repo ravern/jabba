@@ -1,26 +1,18 @@
-// Copies the given text to the clipboard and updates the given element to show
-// feedback.
-function copy(elem, text) {
-    // Copy the text
-    const tmp = $("<input>");
-    $("body").append(tmp);
-    tmp.val(text).select();
-    document.execCommand("copy");
-    tmp.remove();
+$(document).ready(function() {
+    clipboard();
+});
 
-    // Update the element and reset after a while.
-    text = elem.text();
-    const backgroundColor = elem.css('background-color');
+// Configures the copy buttons.
+function clipboard() {
+    const clipboard = new ClipboardJS('.copy');
 
-    elem.text('COPIED').css({
-        'border-color': '#3c3',
-        'background-color': '#3c3',
-    }).prop('disabled', true);
-
-    setTimeout(function() {
-        elem.text(text).css({
-            'border-color': backgroundColor,
-            'background-color': backgroundColor,
-        }).prop('disabled', false);
-    }, 3000);
+    clipboard.on('success', function(e) {
+        // Update the element and reset after a while.
+        const elem = $(e.trigger);
+        const text = elem.text();
+        elem.text('COPIED').prop('disabled', true).addClass('copied');
+        setTimeout(function() {
+            elem.text(text).prop('disabled', false).removeClass('copied');
+        }, 3000);
+    })
 }

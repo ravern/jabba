@@ -126,6 +126,11 @@ main .container {
     margin-right: 2.0rem;
 }
 
+.index main .link button.copied {
+    border-color: #3c3;
+    background-color: #3c3;
+}
+
 .index main .link form {
     margin-bottom: 0;
 }
