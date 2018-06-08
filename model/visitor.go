@@ -9,7 +9,7 @@ import (
 // Visitor represents an unregistered user.
 type Visitor struct {
 	Token     string    `json:"token"`
-	Joined    time.Time `json:"joined"`
+	LastVisit time.Time `json:"last_visit"`
 	LinkSlugs []string  `json:"link_slugs"`
 }
 
@@ -17,7 +17,7 @@ type Visitor struct {
 func NewVisitor() *Visitor {
 	return &Visitor{
 		Token:     uuid.NewV4().String(),
-		Joined:    time.Now(),
+		LastVisit: time.Now(),
 		LinkSlugs: []string{},
 	}
 }

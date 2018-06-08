@@ -71,17 +71,24 @@ func (s *Server) Shorten(w http.ResponseWriter, r *http.Request) {
 	visitor := s.Visitor(r)
 
 	url := r.FormValue("url")
-	link := model.NewLink(url)
+	link, err := model.NewLink(url)
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to create link")
+
+		setFlash(w, "Invalid URL given!")
+
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 
 	if err := s.Database.CreateVisitorLink(link, visitor); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to create link")
 
-		// TODO: Improve flash message
-		setFlash(w, "Failed to shorten link!")
-
-		http.Redirect(w, r, "/", http.StatusFound)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	logrus.WithFields(logrus.Fields{

@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/ravernkoh/jabba/model"
@@ -27,13 +28,21 @@ func (s *Server) SetVisitor(next http.Handler) http.Handler {
 				logger.WithFields(logrus.Fields{
 					"token": c.Value,
 				}).Info("fetched visitor")
+
+				// Update the last visit
+				v.LastVisit = time.Now()
+				if err := s.Database.PutVisitor(v); err != nil {
+					logger.WithFields(logrus.Fields{
+						"token": v.Token,
+					}).Warn("failed to put visitor")
+				}
 			} else {
 				logger.WithFields(logrus.Fields{
 					"token": c.Value,
-				}).Warn("invalid visitor token found, creating new visitor")
+				}).Warn("invalid visitor token found")
 			}
 		} else {
-			logger.Info("could not find visitor token, creating new visitor")
+			logger.Info("failed to find visitor token in cookie")
 		}
 
 		// Create new visitor, since either not found in cookie or

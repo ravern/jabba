@@ -2,7 +2,9 @@
 package main
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/ravernkoh/jabba/bolt"
@@ -11,6 +13,8 @@ import (
 )
 
 func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+
 	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
