@@ -23,7 +23,7 @@ func (s *Server) SetVisitor(next http.Handler) http.Handler {
 		c, err := r.Cookie("visitor")
 		if err == nil {
 			// Try to fetch from database
-			v, err = s.Database.FetchVisitor(c.Value)
+			v, err = s.Database.GetVisitor(c.Value)
 			if err == nil {
 				logger.WithFields(logrus.Fields{
 					"token": c.Value,

@@ -1,9 +1,6 @@
 package bolt
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/boltdb/bolt"
 	"github.com/ravernkoh/jabba/errors"
 	"github.com/ravernkoh/jabba/model"
@@ -12,122 +9,31 @@ import (
 // CreateUserLink creates a new link and adds that link to the user.
 func (d *Database) CreateUserLink(l *model.Link, u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := createLink(tx, l); err != nil {
+		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
 			return err
 		}
-
-		users := tx.Bucket([]byte(usersBucket))
-		if users == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find users bucket",
-			}
-		}
-
 		u.LinkSlugs = append(u.LinkSlugs, l.Slug)
-		user, err := json.Marshal(u)
-		if err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to marshal user: %v", err),
-			}
-		}
-
-		if err := users.Put([]byte(u.Username), user); err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to update user",
-			}
-		}
-
-		return nil
+		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
 	})
 }
 
 // CreateVisitorLink creates a new link and adds that link to the visitor.
 func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := createLink(tx, l); err != nil {
+		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
 			return err
 		}
-
-		visitors := tx.Bucket([]byte(visitorsBucket))
-		if visitors == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find visitors bucket",
-			}
-		}
-
 		v.LinkSlugs = append(v.LinkSlugs, l.Slug)
-		visitor, err := json.Marshal(v)
-		if err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to marshal visitor: %v", err),
-			}
-		}
-
-		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to update visitor",
-			}
-		}
-
-		return nil
+		return d.update(tx, "visitor", visitorsBucket, []byte(v.Token), v)
 	})
-}
-
-// createLink creates a new link.
-func createLink(tx *bolt.Tx, l *model.Link) error {
-	links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
-	if err != nil {
-		return errors.Error{
-			Type:    errors.NotPut,
-			Message: "bolt: failed to create links bucket",
-		}
-	}
-
-	slug := []byte(l.Slug)
-	link, err := json.Marshal(l)
-	if err != nil {
-		return errors.Error{
-			Type:    errors.FailedMarshal,
-			Message: fmt.Sprintf("bolt: failed to marshal link: %v", err),
-		}
-	}
-
-	if links.Get(link) != nil {
-		return errors.Error{
-			Type:    errors.AlreadyExists,
-			Message: "bolt: link  exists",
-		}
-	}
-	if err := links.Put(slug, link); err != nil {
-		return errors.Error{
-			Type:    errors.NotPut,
-			Message: "bolt: failed to create link",
-		}
-	}
-
-	return nil
 }
 
 // DeleteUserLink deletes the link with the given slug and removes that link
 // from the user.
 func (d *Database) DeleteUserLink(slug string, u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := deleteLink(tx, slug); err != nil {
+		if err := d.delete(tx, "links", linksBucket, []byte(slug)); err != nil {
 			return err
-		}
-
-		users := tx.Bucket([]byte(usersBucket))
-		if users == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find users bucket",
-			}
 		}
 
 		i, ok := u.FindLinkSlug(slug)
@@ -139,22 +45,7 @@ func (d *Database) DeleteUserLink(slug string, u *model.User) error {
 		}
 		u.LinkSlugs = append(u.LinkSlugs[:i], u.LinkSlugs[i+1:]...)
 
-		user, err := json.Marshal(u)
-		if err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to marshal user: %v", err),
-			}
-		}
-
-		if err := users.Put([]byte(u.Username), user); err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to update user",
-			}
-		}
-
-		return nil
+		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
 	})
 }
 
@@ -162,16 +53,8 @@ func (d *Database) DeleteUserLink(slug string, u *model.User) error {
 // from the visitor.
 func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := deleteLink(tx, slug); err != nil {
+		if err := d.delete(tx, "links", linksBucket, []byte(slug)); err != nil {
 			return err
-		}
-
-		visitors := tx.Bucket([]byte(visitorsBucket))
-		if visitors == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find visitors bucket",
-			}
 		}
 
 		i, ok := v.FindLinkSlug(slug)
@@ -183,76 +66,16 @@ func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
 		}
 		v.LinkSlugs = append(v.LinkSlugs[:i], v.LinkSlugs[i+1:]...)
 
-		visitor, err := json.Marshal(v)
-		if err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to marshal visitor: %v", err),
-			}
-		}
-
-		if err := visitors.Put([]byte(v.Token), visitor); err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to update visitor",
-			}
-		}
-
-		return nil
+		return d.update(tx, "visitor", visitorsBucket, []byte(v.Token), v)
 	})
-}
-
-// deleteLink deletes the link with the given slug.
-func deleteLink(tx *bolt.Tx, slug string) error {
-	links := tx.Bucket([]byte(linksBucket))
-	if links == nil {
-		return errors.Error{
-			Type:    errors.NotFound,
-			Message: "bolt: failed to find links bucket",
-		}
-	}
-
-	if err := links.Delete([]byte(slug)); err != nil {
-		return errors.Error{
-			Type:    errors.NotDeleted,
-			Message: "bolt: failed to delete link",
-		}
-	}
-
-	return nil
 }
 
 // IncrementLinkCount increments the visit count of the given link.
 func (d *Database) IncrementLinkCount(l *model.Link) error {
 	count := l.Count
 	err := d.db.Update(func(tx *bolt.Tx) error {
-		links, err := tx.CreateBucketIfNotExists([]byte(linksBucket))
-		if err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to create links bucket",
-			}
-		}
-
 		l.Count++
-
-		slug := []byte(l.Slug)
-		link, err := json.Marshal(l)
-		if err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to marshal link: %v", err),
-			}
-		}
-
-		if err := links.Put(slug, link); err != nil {
-			return errors.Error{
-				Type:    errors.NotPut,
-				Message: "bolt: failed to update link",
-			}
-		}
-
-		return nil
+		return d.update(tx, "link", linksBucket, []byte(l.Slug), l)
 	})
 	if err != nil {
 		l.Count = count
@@ -260,30 +83,15 @@ func (d *Database) IncrementLinkCount(l *model.Link) error {
 	return err
 }
 
-// FetchLinks returns the links with the given slugs.
-func (d *Database) FetchLinks(slugs []string) ([]*model.Link, error) {
+// GetLinks returns the links with the given slugs.
+func (d *Database) GetLinks(slugs []string) ([]*model.Link, error) {
 	var ll []*model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {
-		links := tx.Bucket([]byte(linksBucket))
-		if links == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find links bucket",
-			}
-		}
-
 		for _, slug := range slugs {
 			var l *model.Link
-
-			link := links.Get([]byte(slug))
-			if link == nil {
+			if err := d.get(tx, "link", linksBucket, []byte(slug), &l); err != nil {
 				continue
 			}
-
-			if err := json.Unmarshal(link, &l); err != nil {
-				continue
-			}
-
 			ll = append(ll, l)
 		}
 
@@ -292,34 +100,11 @@ func (d *Database) FetchLinks(slugs []string) ([]*model.Link, error) {
 	return ll, err
 }
 
-// FetchLink returns the link with the given slug.
-func (d *Database) FetchLink(slug string) (*model.Link, error) {
+// GetLink returns the link with the given slug.
+func (d *Database) GetLink(slug string) (*model.Link, error) {
 	var l *model.Link
 	err := d.db.View(func(tx *bolt.Tx) error {
-		links := tx.Bucket([]byte(linksBucket))
-		if links == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find links bucket",
-			}
-		}
-
-		link := links.Get([]byte(slug))
-		if link == nil {
-			return errors.Error{
-				Type:    errors.NotFound,
-				Message: "bolt: failed to find link",
-			}
-		}
-
-		if err := json.Unmarshal(link, &l); err != nil {
-			return errors.Error{
-				Type:    errors.FailedMarshal,
-				Message: fmt.Sprintf("bolt: failed to unmarshal link: %v", err),
-			}
-		}
-
-		return nil
+		return d.get(tx, "link", linksBucket, []byte(slug), &l)
 	})
 	return l, err
 }

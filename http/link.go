@@ -18,7 +18,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
 	visitor := s.Visitor(r)
 
-	links, err := s.Database.FetchLinks(visitor.LinkSlugs)
+	links, err := s.Database.GetLinks(visitor.LinkSlugs)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"token": visitor.Token,
@@ -54,7 +54,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 // RedirectSlug redirects to the corresponding page from the slug.
 func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
-	link, err := s.Database.FetchLink(slug)
+	link, err := s.Database.GetLink(slug)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
