@@ -12,25 +12,23 @@ import (
 )
 
 // Index renders the index page.
-//
-// TODO: Support both Visitor and User
 func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
-	visitor := s.Visitor(r)
+	user := s.User(r)
 
-	links, err := s.Database.GetLinks(visitor.LinkSlugs)
+	links, err := s.Database.GetLinks(user.LinkSlugs)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
-			"token": visitor.Token,
-			"err":   err,
-		}).Error("failed to fetch links of visitor")
+			"username": user.Username,
+			"err":      err,
+		}).Error("failed to fetch links of user")
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	logger.WithFields(logrus.Fields{
-		"token": visitor.Token,
-	}).Info("fetched links of visitor")
+		"username": user.Username,
+	}).Info("fetched links of user")
 
 	flash, _ := RetrieveFlash(w, r)
 
@@ -60,11 +58,9 @@ func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 }
 
 // ShortenURL shortens the URL and creates the resulting link.
-//
-// TODO: Support both Visitor and User
 func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
-	visitor := s.Visitor(r)
+	user := s.User(r)
 
 	url := r.FormValue("url")
 	link, err := model.NewLink(url)
@@ -80,7 +76,7 @@ func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.Database.CreateVisitorLink(link, visitor); err != nil {
+	if err := s.Database.CreateLink(link, user); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to create link")
@@ -96,15 +92,13 @@ func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteLink deletes the link.
-//
-// TODO: Support both Visitor and User
 func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
-	visitor := s.Visitor(r)
+	user := s.User(r)
 
 	slug := chi.URLParam(r, "slug")
 
-	if err := s.Database.DeleteVisitorLink(slug, visitor); err != nil {
+	if err := s.Database.DeleteLink(slug, user); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to delete link")

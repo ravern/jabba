@@ -35,6 +35,7 @@ func Development() error {
 	w := fswatch.NewFolderWatcher(".", true, func(path string) bool {
 		return !(strings.HasSuffix(path, ".go") ||
 			strings.HasSuffix(path, ".env") ||
+			strings.HasSuffix(path, ".html") ||
 			strings.HasSuffix(path, ".mod"))
 	}, 1)
 

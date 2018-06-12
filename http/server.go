@@ -47,7 +47,7 @@ func (s *Server) Router() chi.Router {
 	r.Group(func(r chi.Router) {
 		r.Use(
 			// Authentication
-			s.SetVisitor,
+			s.SetUser,
 		)
 
 		r.Get("/", s.Index)
@@ -59,6 +59,11 @@ func (s *Server) Router() chi.Router {
 
 	// Mount user routes
 	r.Group(func(r chi.Router) {
+		r.Use(
+			// Authentication
+			s.SetUser,
+		)
+
 		r.Get("/login", s.LoginForm)
 		r.Post("/login", s.Login)
 		r.Get("/register", s.RegisterForm)

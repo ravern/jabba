@@ -8,19 +8,29 @@ import (
 
 // User represents a registered user.
 type User struct {
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	Joined    time.Time `json:"joined"`
-	LinkSlugs []string  `json:"link_slugs"`
+	Username   string    `json:"username"`
+	Registered bool      `json:"registered"`
+	Email      string    `json:"email"`
+	Password   string    `json:"password"`
+	Joined     time.Time `json:"joined"`
+	LastVisit  time.Time `json:"last_visit"`
+	LinkSlugs  []string  `json:"link_slugs"`
+}
+
+// NewAnonymousUser creates a new anonymous user.
+//
+// Username is a random alphabetic string.
+func NewAnonymousUser() *User {
+	return &User{
+		Username:  generateToken(alphabet, 8),
+		LinkSlugs: []string{},
+	}
 }
 
 // NewUser creates a new user.
 //
 // The given password will be hashed and stored in the password field.
-//
-// TODO: Add validations
-func NewUser(username string, email string, password string) (*User, error) {
+func NewUser(username string, email string, password string, linkSlugs []string) (*User, error) {
 	// Hash the passwords (use default cost)
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
 	if err != nil {
@@ -28,11 +38,12 @@ func NewUser(username string, email string, password string) (*User, error) {
 	}
 
 	return &User{
-		Username:  username,
-		Email:     email,
-		Password:  string(passwordHash),
-		Joined:    time.Now(),
-		LinkSlugs: []string{},
+		Username:   username,
+		Registered: true,
+		Email:      email,
+		Password:   string(passwordHash),
+		Joined:     time.Now(),
+		LinkSlugs:  linkSlugs,
 	}, nil
 }
 

@@ -10,71 +10,71 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// SetVisitor sets the visitor in the context, creating it if not found.
+// SetUser sets the user in the context, creating an anonymous one if not found.
 //
 // Must be placed after SetLogger.
-func (s *Server) SetVisitor(next http.Handler) http.Handler {
+func (s *Server) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logger := middleware.Logger(r)
 
-		var v *model.Visitor
+		var u *model.User
 
 		// Try to find in cookie
-		c, err := r.Cookie("visitor")
+		c, err := r.Cookie("user")
 		if err == nil {
 			// Try to fetch from database
-			v, err = s.Database.GetVisitor(c.Value)
+			u, err = s.Database.GetUser(c.Value)
 			if err == nil {
 				logger.WithFields(logrus.Fields{
-					"token": c.Value,
-				}).Info("fetched visitor")
+					"username": c.Value,
+				}).Info("fetched user")
 
 				// Update the last visit
-				v.LastVisit = time.Now()
-				if err := s.Database.PutVisitor(v); err != nil {
+				u.LastVisit = time.Now()
+				if err := s.Database.UpdateUser(u); err != nil {
 					logger.WithFields(logrus.Fields{
-						"token": v.Token,
-					}).Warn("failed to put visitor")
+						"username": u.Username,
+					}).Warn("failed to update user")
 				}
 			} else {
 				logger.WithFields(logrus.Fields{
-					"token": c.Value,
-				}).Warn("invalid visitor token found")
+					"username": c.Value,
+				}).Warn("invalid username found")
 			}
 		} else {
-			logger.Info("failed to find visitor token in cookie")
+			logger.Info("failed to find user in cookie")
 		}
 
-		// Create new visitor, since either not found in cookie or
-		// database.
+		// Create new anonymous user, since either not found in cookie
+		// or database.
 		//
 		// This is not in the else statement since err might change in
 		// the previous if statement.
 		if err != nil {
-			v = model.NewVisitor()
+			u = model.NewAnonymousUser()
 
-			if err := s.Database.PutVisitor(v); err != nil {
+			if err := s.Database.CreateUser(u); err != nil {
 				logger.WithFields(logrus.Fields{
 					"err": err,
-				}).Error("failed to put visitor")
+				}).Error("failed to create user")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 
 			http.SetCookie(w, &http.Cookie{
-				Name:  "visitor",
-				Value: v.Token,
+				Name:  "user",
+				Value: u.Username,
 			})
 
-			logger.Info("created new visitor")
+			logger.Info("created new user")
 		}
 
-		ctx := context.WithValue(r.Context(), keyVisitor, v)
+		ctx := context.WithValue(r.Context(), keyUser, u)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-// Visitor returns the visitor for the given request.
-func (s *Server) Visitor(r *http.Request) *model.Visitor {
-	return r.Context().Value(keyVisitor).(*model.Visitor)
+// User returns the user for the given request.
+func (s *Server) User(r *http.Request) *model.User {
+	return r.Context().Value(keyUser).(*model.User)
 }

@@ -2,16 +2,12 @@ package model
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"net/url"
 	"time"
 
 	"golang.org/x/net/html"
 )
-
-// runes are the possible runes for generating slugs.
-var runes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 // Link represents a shortened link.
 type Link struct {
@@ -56,10 +52,7 @@ func NewLink(rawURL string) (*Link, error) {
 	}
 
 	// Generate the slug
-	slug := make([]rune, 6)
-	for i := range slug {
-		slug[i] = runes[rand.Intn(len(runes))]
-	}
+	slug := generateToken(alphabet, 6)
 
 	return &Link{
 		Slug:    string(slug),

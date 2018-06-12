@@ -6,8 +6,8 @@ import (
 	"github.com/ravernkoh/jabba/model"
 )
 
-// CreateUserLink creates a new link and adds that link to the user.
-func (d *Database) CreateUserLink(l *model.Link, u *model.User) error {
+// CreateLink creates a new link and adds that link to the user.
+func (d *Database) CreateLink(l *model.Link, u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
 			return err
@@ -17,20 +17,9 @@ func (d *Database) CreateUserLink(l *model.Link, u *model.User) error {
 	})
 }
 
-// CreateVisitorLink creates a new link and adds that link to the visitor.
-func (d *Database) CreateVisitorLink(l *model.Link, v *model.Visitor) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
-			return err
-		}
-		v.LinkSlugs = append(v.LinkSlugs, l.Slug)
-		return d.update(tx, "visitor", visitorsBucket, []byte(v.Token), v)
-	})
-}
-
-// DeleteUserLink deletes the link with the given slug and removes that link
+// DeleteLink deletes the link with the given slug and removes that link
 // from the user.
-func (d *Database) DeleteUserLink(slug string, u *model.User) error {
+func (d *Database) DeleteLink(slug string, u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		if err := d.delete(tx, "links", linksBucket, []byte(slug)); err != nil {
 			return err
@@ -46,27 +35,6 @@ func (d *Database) DeleteUserLink(slug string, u *model.User) error {
 		u.LinkSlugs = append(u.LinkSlugs[:i], u.LinkSlugs[i+1:]...)
 
 		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
-	})
-}
-
-// DeleteVisitorLink deletes the link with the given slug and removes that link
-// from the visitor.
-func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := d.delete(tx, "links", linksBucket, []byte(slug)); err != nil {
-			return err
-		}
-
-		i, ok := v.FindLinkSlug(slug)
-		if !ok {
-			return errors.Error{
-				Type:    errors.Unauthorized,
-				Message: "bolt: failed to find link in visitor",
-			}
-		}
-		v.LinkSlugs = append(v.LinkSlugs[:i], v.LinkSlugs[i+1:]...)
-
-		return d.update(tx, "visitor", visitorsBucket, []byte(v.Token), v)
 	})
 }
 
