@@ -17,15 +17,15 @@ func (d *Database) CreateLink(l *model.Link, u *model.User) error {
 	})
 }
 
-// DeleteLink deletes the link with the given slug and removes that link
+// DeleteLink deletes the given link and removes that link
 // from the user.
-func (d *Database) DeleteLink(slug string, u *model.User) error {
+func (d *Database) DeleteLink(l *model.Link, u *model.User) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
-		if err := d.delete(tx, "links", linksBucket, []byte(slug)); err != nil {
+		if err := d.delete(tx, "links", linksBucket, []byte(l.Slug)); err != nil {
 			return err
 		}
 
-		i, ok := u.FindLinkSlug(slug)
+		i, ok := u.FindLinkSlug(l.Slug)
 		if !ok {
 			return errors.Error{
 				Type:    errors.Unauthorized,

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -10,6 +11,56 @@ import (
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/ravernkoh/jabba/model"
 )
+
+// SetLink sets the link in the context.
+//
+// Must be placed after SetLogger.
+func (s *Server) SetLink(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := middleware.Logger(r)
+
+		slug := chi.URLParam(r, "slug")
+
+		l, err := s.Database.GetLink(slug)
+		if err != nil {
+			logger.WithFields(logrus.Fields{
+				"slug": slug,
+			}).Errorf("failed to get link")
+
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), keyLink, l)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// RequireLink checks if the user is authorized to access the link.
+//
+// Must be placed after SetLogger, SetUser and SetLink.
+func (s *Server) RequireLink(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logger := middleware.Logger(r)
+		user := s.User(r)
+		link := s.Link(r)
+		if _, ok := user.FindLinkSlug(link.Slug); !ok {
+			logger.WithFields(logrus.Fields{
+				"slug": link.Slug,
+			}).Warn("get link unauthorized")
+
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// Link returns the link for the given request.
+func (s *Server) Link(r *http.Request) *model.Link {
+	return r.Context().Value(keyLink).(*model.Link)
+}
 
 // Index renders the index page.
 func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
@@ -88,17 +139,30 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+// UpdateLinkForm renders to form to update the link.
+func (s *Server) UpdateLinkForm(w http.ResponseWriter, r *http.Request) {
+	link := s.Link(r)
+
+	flash, _ := s.Flash(w, r)
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"links/edit.css",
+	}, nil, "links/edit.html", map[string]interface{}{
+		"Flash": flash,
+		"Link":  link,
+	})
+}
+
 // DeleteLink deletes the link.
 func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
 	user := s.User(r)
+	link := s.Link(r)
 
-	slug := chi.URLParam(r, "slug")
-
-	if err := s.Database.DeleteLink(slug, user); err != nil {
+	if err := s.Database.DeleteLink(link, user); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
-		}).Error("failed to delete link")
+		}).Warn("delete link unauthorized")
 
 		switch err.(errors.Error).Type {
 		case errors.Unauthorized:

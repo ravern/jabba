@@ -14,6 +14,16 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// unauthorized renders the 401 page.
+func unauthorized(w http.ResponseWriter, r *http.Request) {
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"error.css",
+	}, nil, "error.html", map[string]interface{}{
+		"Message": "401 Unauthorized",
+	})
+}
+
 // internalServerError renders the 500 page.
 func internalServerError(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, r, "layout.html", []string{

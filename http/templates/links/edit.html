@@ -1,0 +1,24 @@
+<header>
+    <div class="container">
+        {{ template "nav.html" . }}
+    </div>
+</header>
+<main>
+    <div class="container">
+        {{ template "flash.html" . }}
+        <form action="/links/{{ .Link.Slug }}" method="POST">
+            <div class="input">
+                <input type="text" placeholder="Slug" name="slug" value="{{ .Link.Slug }}" />
+            </div>
+            <div class="input">
+                <input type="text" placeholder="Title" name="title" value="{{ .Link.Title }}" />
+            </div>
+            <div class="input">
+                <input type="url" placeholder="URL" name="url" value="{{ .Link.URL }}" />
+            </div>
+            <div class="input">
+                <input type="submit" value="SAVE" />
+            </div>
+        </form>
+    </div>
+</main>

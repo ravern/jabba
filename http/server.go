@@ -69,7 +69,14 @@ func (s *Server) Router() chi.Router {
 		)
 
 		r.Post("/links", s.CreateLink)
-		r.Post("/links/{slug}/delete", s.DeleteLink)
+		r.Group(func(r chi.Router) {
+			r.Use(
+				s.SetLink,
+				s.RequireLink,
+			)
+			r.Get("/links/{slug}/edit", s.UpdateLinkForm)
+			r.Post("/links/{slug}/delete", s.DeleteLink)
+		})
 	})
 
 	// Mount user routes

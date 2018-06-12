@@ -1,12 +1,12 @@
 <header>
     <div class="container">
-        {{ template "partials/nav.html" . }}
+        {{ template "nav.html" . }}
     </div>
 </header>
 <main>
     <div class="container">
         <h3>Register</h3>
-        {{ template "partials/flash.html" . }}
+        {{ template "flash.html" . }}
         <form action="/users" method="POST">
             <div class="input">
                 <input type="text" placeholder="Username" name="username" value="{{ .User.Username }}" />

@@ -10,8 +10,8 @@ type Database interface {
 	GetUser(username string) (*model.User, error)
 
 	CreateLink(*model.Link, *model.User) error
-	DeleteLink(slug string, u *model.User) error
 	IncrementLinkCount(*model.Link)
 	GetLinks(slugs []string) ([]*model.Link, error)
 	GetLink(slug string) (*model.Link, error)
+	DeleteLink(*model.Link, *model.User) error
 }

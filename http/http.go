@@ -17,6 +17,7 @@ type key string
 // Keys used by the middleware defined in this package.
 const (
 	keyUser key = "user"
+	keyLink key = "link"
 )
 
 // Assets and templates loaded using packr.
