@@ -33,6 +33,14 @@ func NewAnonymousUser() *User {
 //
 // The given password will be hashed and stored in the password field.
 func NewUser(username string, email string, password string, linkSlugs []string) (*User, error) {
+	// Check password length manually since after hashing its all the same
+	if len(password) < 4 {
+		return nil, errors.Error{
+			Type:    errors.Invalid,
+			Message: "user: invalid",
+		}
+	}
+
 	// Hash the passwords (use default cost)
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
 	if err != nil {
