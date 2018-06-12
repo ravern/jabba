@@ -32,7 +32,10 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 
 	flash, _ := s.Flash(w, r)
 
-	executeTemplate(w, r, "layout.html", nil, "index.html", map[string]interface{}{
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"index.css",
+	}, nil, "index.html", map[string]interface{}{
 		"Flash":    flash,
 		"Hostname": s.Hostname,
 		"Links":    links,

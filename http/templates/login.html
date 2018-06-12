@@ -1,24 +1,22 @@
-<div class="login">
-    <header>
-        <div class="container">
-            {{ template "partials/nav.html" . }}
-        </div>
-    </header>
-    <main>
-        <div class="container">
-            <h3>Login</h3>
-            {{ template "partials/flash.html" . }}
-            <form method="POST">
-                <div class="input">
-                    <input type="text" placeholder="Username" name="username" />
-                </div>
-                <div class="input">
-                    <input type="password" placeholder="Password" name="password" />
-                </div>
-                <div class="input">
-                    <input type="submit" value="LOGIN" />
-                </div>
-            </form>
-        </div>
-    </main>
-</div>
+<header>
+    <div class="container">
+        {{ template "partials/nav.html" . }}
+    </div>
+</header>
+<main>
+    <div class="container">
+        <h3>Login</h3>
+        {{ template "partials/flash.html" . }}
+        <form method="POST">
+            <div class="input">
+                <input type="text" placeholder="Username" name="username" />
+            </div>
+            <div class="input">
+                <input type="password" placeholder="Password" name="password" />
+            </div>
+            <div class="input">
+                <input type="submit" value="LOGIN" />
+            </div>
+        </form>
+    </div>
+</main>

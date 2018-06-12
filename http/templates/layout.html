@@ -19,7 +19,10 @@
         <script>load('https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css', '/public/css/normalize.min.css');</script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" rel="stylesheet" />
         <script>load('https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css', '/public/css/skeleton.min.css');</script>
-        <link href="/public/css/index.css" rel="stylesheet" />
+        <link href="/public/css/style.css" rel="stylesheet" />
+        {{ range .Styles }}
+            <link href="/public/css/{{ . }}" rel="stylesheet" />
+        {{ end }}
     </head>
     <body>
         {{ .Content }}

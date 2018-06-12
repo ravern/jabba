@@ -1,0 +1,27 @@
+header {
+    padding-top: 1rem;
+}
+
+header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+header nav .left a {
+    text-decoration: none;
+    color: black;
+}
+
+header nav .left a h5 {
+    margin-bottom: 0;
+}
+
+header nav .right .login {
+    margin-right: 2.0rem;
+}
+
+header nav .right a.button {
+    margin-bottom: 0;
+}

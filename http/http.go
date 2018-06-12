@@ -38,7 +38,7 @@ func init() {
 	})
 }
 
-func executeTemplate(w http.ResponseWriter, r *http.Request, layout string, layoutData interface{}, name string, data interface{}) {
+func executeTemplate(w http.ResponseWriter, r *http.Request, layout string, styles []string, layoutData interface{}, name string, data interface{}) {
 	logger := middleware.Logger(r)
 
 	// Render template
@@ -53,12 +53,10 @@ func executeTemplate(w http.ResponseWriter, r *http.Request, layout string, layo
 	}
 
 	// Render layout with template as content
-	if err := templates.ExecuteTemplate(w, layout, struct {
-		Content template.HTML
-		Data    interface{}
-	}{
-		Content: template.HTML(b.String()),
-		Data:    layoutData,
+	if err := templates.ExecuteTemplate(w, layout, map[string]interface{}{
+		"Content": template.HTML(b.String()),
+		"Styles":  styles,
+		"Data":    layoutData,
 	}); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,

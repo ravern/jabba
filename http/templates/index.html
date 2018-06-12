@@ -1,42 +1,40 @@
-<div class="index">
-    <header>
-        <div class="container">
-            {{ template "partials/nav.html" . }}
+<header>
+    <div class="container">
+        {{ template "partials/nav.html" . }}
+    </div>
+</header>
+<main>
+    <div class="container">
+        <div class="hero">
+            <h3>Jabba</h3>
+            {{ template "partials/flash.html" . }}
+            <p>Fast and simple link shortener with cool features!</p>
+            <form action="/links" method="POST">
+                <input type="url" name="url" placeholder="Paste your link here" />
+                <input type="submit" value="SHORTEN" />
+            </form>
         </div>
-    </header>
-    <main>
-        <div class="container">
-            <div class="hero">
-                <h3>Jabba</h3>
-                {{ template "partials/flash.html" . }}
-                <p>Fast and simple link shortener with cool features!</p>
-                <form action="/links" method="POST">
-                    <input type="url" name="url" placeholder="Paste your link here" />
-                    <input type="submit" value="SHORTEN" />
-                </form>
+        <hr />
+        {{ $hostname := .Hostname }}
+        {{ range .Links }}
+            <div class="link">
+                    <a class="slug" href="{{ .URL }}">{{ .Slug }}</a>
+                    <span class="count">{{ .Count }}</span>
+                    <span class="url">{{ .Title }}</span>
+                    <button
+                        class="button-primary copy"
+                        data-clipboard-text="{{ $hostname }}/{{ .Slug }}"
+                    >COPY</button>
+                    <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
+                    <form
+                        action="/links/{{ .Slug }}/delete"
+                        method="POST"
+                        onsubmit="return confirm('Are you sure?');"
+                    >
+                        <input type="submit" value="DELETE" class="button-primary delete" />
+                    </form>
             </div>
             <hr />
-            {{ $hostname := .Hostname }}
-            {{ range .Links }}
-                <div class="link">
-                        <a class="slug" href="{{ .URL }}">{{ .Slug }}</a>
-                        <span class="count">{{ .Count }}</span>
-                        <span class="url">{{ .Title }}</span>
-                        <button
-                            class="button-primary copy"
-                            data-clipboard-text="{{ $hostname }}/{{ .Slug }}"
-                        >COPY</button>
-                        <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
-                        <form
-                            action="/links/{{ .Slug }}/delete"
-                            method="POST"
-                            onsubmit="return confirm('Are you sure?');"
-                        >
-                            <input type="submit" value="DELETE" class="button-primary delete" />
-                        </form>
-                </div>
-                <hr />
-            {{ end }}
-        </div>
-    </main>
-</div>
+        {{ end }}
+    </div>
+</main>

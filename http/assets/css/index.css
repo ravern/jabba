@@ -1,116 +1,48 @@
-/* Margin */
-h1     { margin-bottom: 2.0rem; font-weight: 500; }
-h2     { margin-bottom: 2.0rem; font-weight: 500; }
-h3     { margin-bottom: 2.0rem; font-weight: 500; }
-h4     { margin-bottom: 2.0rem; font-weight: 500; }
-h5     { margin-bottom: 2.0rem; font-weight: 500; }
-h6     { margin-bottom: 2.0rem; font-weight: 500; }
-p      { margin-bottom: 3.0rem; font-weight: normal; }
-hr     { margin-bottom: 1.0rem; margin-top: 0; width: 100%; }
-
-/* Flash */
-.flash.success { color: #3c3; }
-.flash.failure { color: #e33; }
-
-/* Header and navigation */
-header {
-    padding-top: 1rem;
-}
-
-header nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-header nav .left a {
-    text-decoration: none;
-    color: black;
-}
-
-header nav .left a h5 {
-    margin-bottom: 0;
-}
-
-header nav .right .login {
-    margin-right: 2.0rem;
-}
-
-header nav .right a.button {
-    margin-bottom: 0;
-}
-
-/* Main */
-main .container {
-    padding-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Error */
-.error {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.error main {
-    flex: 1;
-}
-
-.error main .container {
-    height: 100%;
-    justify-content: center;
-}
-
-/* Index */
-.index main .hero {
+main .hero {
     text-align: center;
     padding-top: 2.0rem;
     margin-bottom: 2.0rem;
 }
 
-.index main .hero p {
+main .hero p {
     margin-bottom: 1.0rem;
 }
 
-.index main .hero form {
+main .hero form {
     display: inline-block;
 }
 
-.index main .hero form input {
+main .hero form input {
     margin-bottom: 0;
 }
 
-.index main .hero form input[type="url"] {
+main .hero form input[type="url"] {
     width: 300px;
 }
 
-.index main .link {
+main .link {
     width: 100%;
 }
 
-.index main .link {
+main .link {
     display: flex;
     align-items: center;
     margin-bottom: 1.0rem;
 }
 
-.index main .link .slug {
+main .link .slug {
     display: inline-block;
     width: 5.0rem;
     margin-right: 2.0rem;
 }
 
-.index main .link .count {
+main .link .count {
     display: inline-block;
     width: 2.0rem;
     margin-right: 2.0rem;
 }
 
-.index main .link .url {
+main .link .url {
     display: inline-block;
     margin-right: 2.0rem;
     flex: 1;
@@ -120,54 +52,33 @@ main .container {
     min-width: 5.0rem;
 }
 
-.index main .link a {
+main .link a {
     margin-bottom: 0;
     margin-right: 2.0rem;
 }
 
-.index main .link button {
+main .link button {
     margin-bottom: 0;
     margin-right: 2.0rem;
 }
 
-.index main .link button.copied {
+main .link button.copied {
     border-color: #3c3;
     background-color: #3c3;
 }
 
-.index main .link form {
+main .link form {
     margin-bottom: 0;
 }
 
-.index main .link form .delete {
+main .link form .delete {
     margin-right: 0;
     margin-bottom: 0;
     background-color: #e33;
     border-color: #e33;
 }
 
-/* Login */
-.login main {
-    padding-top: 2.0rem;
-}
-
-.login main form {
-    text-align: center;
-}
-
-.login main form .input input {
-    width: 300px;
-}
-
-/* Register */
-.register main {
-    padding-top: 2.0rem;
-}
-
-.register main form {
-    text-align: center;
-}
-
-.register main form .input input {
-    width: 300px;
+main .link form .delete:hover {
+    background-color: #d22;
+    border-color: #d22;
 }

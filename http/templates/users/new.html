@@ -1,30 +1,28 @@
-<div class="register">
-    <header>
-        <div class="container">
-            {{ template "partials/nav.html" . }}
-        </div>
-    </header>
-    <main>
-        <div class="container">
-            <h3>Register</h3>
-            {{ template "partials/flash.html" . }}
-            <form action="/users" method="POST">
-                <div class="input">
-                    <input type="text" placeholder="Username" name="username" />
-                </div>
-                <div class="input">
-                    <input type="email" placeholder="Email" name="email" />
-                </div>
-                <div class="input">
-                    <input type="password" placeholder="Password" name="password" />
-                </div>
-                <div class="input">
-                    <input type="password" placeholder="Confirm password" name="confirm_password" />
-                </div>
-                <div class="input">
-                    <input type="submit" value="REGISTER" />
-                </div>
-            </form>
-        </div>
-    </main>
-</div>
+<header>
+    <div class="container">
+        {{ template "partials/nav.html" . }}
+    </div>
+</header>
+<main>
+    <div class="container">
+        <h3>Register</h3>
+        {{ template "partials/flash.html" . }}
+        <form action="/users" method="POST">
+            <div class="input">
+                <input type="text" placeholder="Username" name="username" />
+            </div>
+            <div class="input">
+                <input type="email" placeholder="Email" name="email" />
+            </div>
+            <div class="input">
+                <input type="password" placeholder="Password" name="password" />
+            </div>
+            <div class="input">
+                <input type="password" placeholder="Confirm password" name="confirm_password" />
+            </div>
+            <div class="input">
+                <input type="submit" value="REGISTER" />
+            </div>
+        </form>
+    </div>
+</main>

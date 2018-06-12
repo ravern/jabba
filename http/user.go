@@ -12,7 +12,10 @@ import (
 // LoginForm renders the login form.
 func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeTemplate(w, r, "layout.html", nil, "login.html", map[string]interface{}{
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"login.css",
+	}, nil, "login.html", map[string]interface{}{
 		"Flash": flash,
 	})
 }
@@ -24,7 +27,10 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeTemplate(w, r, "layout.html", nil, "users/new.html", map[string]interface{}{
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"users/new.css",
+	}, nil, "users/new.html", map[string]interface{}{
 		"Flash": flash,
 	})
 }

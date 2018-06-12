@@ -1,0 +1,11 @@
+main {
+    padding-top: 2.0rem;
+}
+
+main form {
+    text-align: center;
+}
+
+main form .input input {
+    width: 300px;
+}
