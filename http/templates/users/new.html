@@ -8,7 +8,7 @@
         <div class="container">
             <h3>Register</h3>
             {{ template "partials/flash.html" . }}
-            <form method="POST">
+            <form action="/users" method="POST">
                 <div class="input">
                     <input type="text" placeholder="Username" name="username" />
                 </div>

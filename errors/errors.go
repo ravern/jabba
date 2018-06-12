@@ -4,6 +4,7 @@ package errors
 type Error struct {
 	Type    Type
 	Message string
+	Payload map[string]interface{}
 }
 
 // Type represents the type of error.
@@ -15,8 +16,11 @@ const (
 	NotPut
 	NotDeleted
 	Unauthorized
+	Invalid
 	AlreadyExists
 	FailedMarshal
+	FailedHash
+	Unknown
 )
 
 func (err Error) Error() string {

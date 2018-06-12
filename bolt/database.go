@@ -66,21 +66,22 @@ func (d *Database) bucket(tx *bolt.Tx, bucket string, name string) *bolt.Bucket 
 }
 
 // create puts the given value with the given key into the given transaction, but
-// only if it exists.
+// only if it doesn't exist.
 func (d *Database) create(tx *bolt.Tx, name string, bucket string, key []byte, value interface{}) error {
-	if err := d.get(tx, name, bucket, key, value); err != nil {
-		if err.(errors.Error).Type != errors.NotFound {
-			return errors.Error{
-				Type:    errors.AlreadyExists,
-				Message: fmt.Sprintf("bolt: %s already exists", name),
-			}
+	err := d.get(tx, name, bucket, key, &struct{}{})
+	if err == nil {
+		return errors.Error{
+			Type:    errors.AlreadyExists,
+			Message: fmt.Sprintf("bolt: %s already exists", name),
 		}
+	} else if err.(errors.Error).Type != errors.NotFound {
+		return err
 	}
 	return d.put(tx, name, bucket, key, value)
 }
 
 // update puts the given value with the given key into the given transaction, but
-// only if it doesn't exist.
+// only if it exists.
 func (d *Database) update(tx *bolt.Tx, name string, bucket string, key []byte, value interface{}) error {
 	if err := d.get(tx, name, bucket, key, &struct{}{}); err != nil {
 		return err

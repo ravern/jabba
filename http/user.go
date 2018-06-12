@@ -26,7 +26,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := RetrieveFlash(w, r)
-	executeTemplate(w, r, "layout.html", nil, "register.html", struct {
+	executeTemplate(w, r, "layout.html", nil, "users/new.html", struct {
 		Flash Flash
 	}{
 		Flash: flash,
@@ -67,10 +67,10 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.Database.CreateUser(user); err != nil {
+	if err := s.Database.UpdateUserUsername(s.User(r).Username, user); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
-		}).Error("failed to create user")
+		}).Error("failed to update user")
 
 		switch err.(errors.Error).Type {
 		case errors.AlreadyExists:

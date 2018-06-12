@@ -1,39 +1,31 @@
 package model
 
 import (
-	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
+	"github.com/asaskevich/govalidator"
 	"golang.org/x/net/html"
 )
 
 // Link represents a shortened link.
 type Link struct {
-	Slug    string    `json:"slug"`
-	Title   string    `json:"title"`
-	URL     string    `json:"url"`
-	Created time.Time `json:"created"`
-	Count   int       `json:"count"`
+	Slug    string    `json:"slug" valid:"-"`
+	Title   string    `json:"title" valid:"-"`
+	URL     string    `json:"url" valid:"url"`
+	Created time.Time `json:"created" valid:"-"`
+	Count   int       `json:"count" valid:"-"`
 }
 
 // NewLink creates a new link with the given URL.
 //
 // Title generation is attempted, by visiting the URL and extracting the <title>.
 // The link will default to 'Untitled' if this does not succeed.
-//
-// TODO: Add validations
-func NewLink(rawURL string) (*Link, error) {
-	// Validate URL
-	if _, err := url.ParseRequestURI(rawURL); err != nil {
-		return nil, fmt.Errorf("link: invalid URL: %v", err)
-	}
-
+func NewLink(url string) (*Link, error) {
 	// Try to generate title automatically
 	title := "Untitled"
 	client := &http.Client{Timeout: 3 * time.Second}
-	resp, err := client.Get(rawURL)
+	resp, err := client.Get(url)
 	if err == nil && resp.StatusCode == http.StatusOK {
 		t := html.NewTokenizer(resp.Body)
 		for {
@@ -54,10 +46,17 @@ func NewLink(rawURL string) (*Link, error) {
 	// Generate the slug
 	slug := generateToken(alphabet, 6)
 
-	return &Link{
+	l := &Link{
 		Slug:    string(slug),
 		Title:   title,
-		URL:     rawURL,
+		URL:     url,
 		Created: time.Now(),
-	}, nil
+	}
+
+	// Validate
+	if _, err := govalidator.ValidateStruct(l); err != nil {
+		return nil, err
+	}
+
+	return l, nil
 }

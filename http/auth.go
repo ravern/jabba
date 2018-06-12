@@ -31,7 +31,7 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 
 				// Update the last visit
 				u.LastVisit = time.Now()
-				if err := s.Database.UpdateUser(u); err != nil {
+				if err = s.Database.UpdateUser(u); err != nil {
 					logger.WithFields(logrus.Fields{
 						"username": u.Username,
 					}).Warn("failed to update user")
@@ -64,6 +64,7 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 			http.SetCookie(w, &http.Cookie{
 				Name:  "user",
 				Value: u.Username,
+				Path:  "/",
 			})
 
 			logger.Info("created new user")

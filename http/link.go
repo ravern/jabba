@@ -69,7 +69,7 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Error("failed to create link")
 
-		f := Flash{Failure: "Invalid URL given."}
+		f := Flash{Failure: "Could not create link."}
 		f.Save(w)
 
 		http.Redirect(w, r, "/", http.StatusFound)

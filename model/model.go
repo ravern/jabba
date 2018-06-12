@@ -1,7 +1,17 @@
 // Package model defines all the models.
 package model
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+
+	"github.com/asaskevich/govalidator"
+	"github.com/ravernkoh/jabba/errors"
+)
+
+func init() {
+	govalidator.SetFieldsRequiredByDefault(true)
+}
 
 // alphabet is the alphabet.
 var alphabet = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -13,4 +23,20 @@ func generateToken(runes []rune, length int) string {
 		r[i] = runes[rand.Intn(len(runes))]
 	}
 	return string(r)
+}
+
+// newValidationError generates an error from the raw validation error.
+func newValidationError(name string, err error) errors.Error {
+	if errs, ok := err.(govalidator.Errors); ok {
+		if _, ok := errs[0].(govalidator.Error); ok {
+			return errors.Error{
+				Type:    errors.Invalid,
+				Message: fmt.Sprintf("%s: invalid", name),
+			}
+		}
+	}
+	return errors.Error{
+		Type:    errors.Unknown,
+		Message: fmt.Sprintf("%s: failed to create", name),
+	}
 }

@@ -16,11 +16,13 @@ func (f Flash) Save(w http.ResponseWriter) error {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "flash-success",
 		Value: f.Success,
+		Path:  "/",
 	})
 
 	http.SetCookie(w, &http.Cookie{
 		Name:  "flash-failure",
 		Value: f.Failure,
+		Path:  "/",
 	})
 
 	return nil
@@ -38,6 +40,7 @@ func RetrieveFlash(w http.ResponseWriter, r *http.Request) (Flash, error) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "flash-success",
 		Expires: time.Unix(0, 0),
+		Path:    "/",
 	})
 
 	c, err = r.Cookie("flash-failure")
@@ -48,6 +51,7 @@ func RetrieveFlash(w http.ResponseWriter, r *http.Request) (Flash, error) {
 	http.SetCookie(w, &http.Cookie{
 		Name:    "flash-failure",
 		Expires: time.Unix(0, 0),
+		Path:    "/",
 	})
 
 	return f, nil

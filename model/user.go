@@ -3,18 +3,20 @@ package model
 import (
 	"time"
 
+	"github.com/asaskevich/govalidator"
+	"github.com/ravernkoh/jabba/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents a registered user.
 type User struct {
-	Username   string    `json:"username"`
-	Registered bool      `json:"registered"`
-	Email      string    `json:"email"`
-	Password   string    `json:"password"`
-	Joined     time.Time `json:"joined"`
-	LastVisit  time.Time `json:"last_visit"`
-	LinkSlugs  []string  `json:"link_slugs"`
+	Username   string    `json:"username" valid:"-"`
+	Registered bool      `json:"registered" valid:"-"`
+	Email      string    `json:"email" valid:"email"`
+	Password   string    `json:"password" valid:"-"`
+	Joined     time.Time `json:"joined" valid:"-"`
+	LastVisit  time.Time `json:"last_visit" valid:"-"`
+	LinkSlugs  []string  `json:"link_slugs" valid:"-"`
 }
 
 // NewAnonymousUser creates a new anonymous user.
@@ -34,17 +36,28 @@ func NewUser(username string, email string, password string, linkSlugs []string)
 	// Hash the passwords (use default cost)
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
 	if err != nil {
-		return nil, err
+		return nil, errors.Error{
+			Type:    errors.FailedHash,
+			Message: "user: failed to hash password",
+		}
 	}
 
-	return &User{
+	u := &User{
 		Username:   username,
 		Registered: true,
 		Email:      email,
 		Password:   string(passwordHash),
 		Joined:     time.Now(),
+		LastVisit:  time.Now(),
 		LinkSlugs:  linkSlugs,
-	}, nil
+	}
+
+	// Validate
+	if _, err := govalidator.ValidateStruct(u); err != nil {
+		return nil, newValidationError("user", err)
+	}
+
+	return u, nil
 }
 
 // FindLinkSlug searches for a slug that belongs to the user and returns its

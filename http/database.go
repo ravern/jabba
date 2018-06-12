@@ -6,6 +6,7 @@ import "github.com/ravernkoh/jabba/model"
 type Database interface {
 	CreateUser(*model.User) error
 	UpdateUser(*model.User) error
+	UpdateUserUsername(username string, u *model.User) error
 	GetUser(username string) (*model.User, error)
 
 	CreateLink(*model.Link, *model.User) error

@@ -2,6 +2,7 @@ module github.com/ravernkoh/jabba
 
 require (
 	github.com/andreaskoch/go-fswatch v1.0.0
+	github.com/asaskevich/govalidator v0.0.0-20180319081651-7d2e70ef918f
 	github.com/boltdb/bolt v1.3.1
 	github.com/dgrijalva/jwt-go v0.0.0-20180308231308-06ea1031745c
 	github.com/go-chi/chi v0.0.0-20171222161133-e83ac2304db3
