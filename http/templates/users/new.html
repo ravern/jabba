@@ -9,10 +9,10 @@
         {{ template "partials/flash.html" . }}
         <form action="/users" method="POST">
             <div class="input">
-                <input type="text" placeholder="Username" name="username" />
+                <input type="text" placeholder="Username" name="username" value="{{ .User.Username }}" />
             </div>
             <div class="input">
-                <input type="email" placeholder="Email" name="email" />
+                <input type="email" placeholder="Email" name="email" value="{{ .User.Email }}" />
             </div>
             <div class="input">
                 <input type="password" placeholder="Password" name="password" />

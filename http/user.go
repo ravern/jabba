@@ -27,12 +27,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeTemplate(w, r, "layout.html", []string{
-		"nav.css",
-		"users/new.css",
-	}, nil, "users/new.html", map[string]interface{}{
-		"Flash": flash,
-	})
+	executeCreateUserFormTemplate(w, r, flash, &model.User{})
 }
 
 // CreateUser attempts to create the user.
@@ -47,10 +42,14 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		confirmPassword = r.FormValue("confirm_password")
 	)
 
-	if password != confirmPassword {
-		s.SetFlash(w, Flash{Failure: "Passwords didn't match"})
+	var f Flash
 
-		http.Redirect(w, r, "/users/new", http.StatusFound)
+	if password != confirmPassword {
+		f.Failure = "Passwords didn't match"
+		executeCreateUserFormTemplate(w, r, f, &model.User{
+			Username: username,
+			Email:    email,
+		})
 		return
 	}
 
@@ -61,9 +60,11 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Warn("failed to create user")
 
-		s.SetFlash(w, Flash{Failure: "Could not create user."})
-
-		http.Redirect(w, r, "/users/new", http.StatusFound)
+		f.Failure = "Could not create user."
+		executeCreateUserFormTemplate(w, r, f, &model.User{
+			Username: username,
+			Email:    email,
+		})
 		return
 	}
 
@@ -74,16 +75,25 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		switch err.(errors.Error).Type {
 		case errors.AlreadyExists:
-			s.SetFlash(w, Flash{Failure: "Username already exists."})
+			f.Failure = "Username already exists."
 		default:
-			s.SetFlash(w, Flash{Failure: "Could not create user."})
+			f.Failure = "Could not create user."
 		}
 
-		http.Redirect(w, r, "/users/new", http.StatusFound)
+		executeCreateUserFormTemplate(w, r, f, user)
 		return
 	}
 
 	s.SetFlash(w, Flash{Success: "Successfully registered user!"})
-
 	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
+func executeCreateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"users/new.css",
+	}, nil, "users/new.html", map[string]interface{}{
+		"Flash": f,
+		"User":  u,
+	})
 }
