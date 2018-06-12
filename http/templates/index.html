@@ -10,7 +10,7 @@
                 {{ template "partials/flash.html" . }}
                 <h3>Jabba</h3>
                 <p>Fast and simple link shortener with cool features!</p>
-                <form method="POST">
+                <form action="/links" method="POST">
                     <input type="url" name="url" placeholder="Paste your link here" />
                     <input type="submit" value="SHORTEN" />
                 </form>
@@ -28,7 +28,7 @@
                         >COPY</button>
                         <a class="button" href="/{{ .Slug }}/edit">EDIT</a>
                         <form
-                            action="/{{ .Slug }}/delete"
+                            action="/links/{{ .Slug }}/delete"
                             method="POST"
                             onsubmit="return confirm('Are you sure?');"
                         >

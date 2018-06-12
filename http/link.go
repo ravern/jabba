@@ -43,8 +43,8 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// RedirectSlug redirects to the corresponding page from the slug.
-func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
+// Redirect redirects to the corresponding page from the slug.
+func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 	link, err := s.Database.GetLink(slug)
 	if err != nil {
@@ -57,8 +57,8 @@ func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }
 
-// ShortenURL shortens the URL and creates the resulting link.
-func (s *Server) ShortenURL(w http.ResponseWriter, r *http.Request) {
+// CreateLink shortens the URL and creates the resulting link.
+func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
 	user := s.User(r)
 

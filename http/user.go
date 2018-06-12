@@ -23,8 +23,8 @@ func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 }
 
-// RegisterForm renders the registration form.
-func (s *Server) RegisterForm(w http.ResponseWriter, r *http.Request) {
+// CreateUserForm renders the user creation form.
+func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := RetrieveFlash(w, r)
 	executeTemplate(w, r, "layout.html", nil, "register.html", struct {
 		Flash Flash
@@ -33,9 +33,10 @@ func (s *Server) RegisterForm(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Register attempts to register the user.
-func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
+// CreateUser attempts to create the user.
+func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	logger := middleware.Logger(r)
+	user := s.User(r)
 
 	var (
 		username        = r.FormValue("username")
@@ -48,11 +49,12 @@ func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 		f := Flash{Failure: "Passwords didn't match"}
 		f.Save(w)
 
-		http.Redirect(w, r, "/register", http.StatusFound)
+		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
 	}
 
-	user, err := model.NewUser(username, email, password)
+	var err error
+	user, err = model.NewUser(username, email, password, user.LinkSlugs)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
@@ -61,7 +63,7 @@ func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 		f := Flash{Failure: "Could not create user."}
 		f.Save(w)
 
-		http.Redirect(w, r, "/register", http.StatusFound)
+		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
 	}
 
@@ -79,7 +81,7 @@ func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 			f.Save(w)
 		}
 
-		http.Redirect(w, r, "/register", http.StatusFound)
+		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
 	}
 

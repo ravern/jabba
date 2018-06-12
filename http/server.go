@@ -43,7 +43,7 @@ func (s *Server) Router() chi.Router {
 	// Mount assets
 	fileServer(r, "/public", assets)
 
-	// Mount link routes
+	// Mount root routes
 	r.Group(func(r chi.Router) {
 		r.Use(
 			// Authentication
@@ -51,10 +51,18 @@ func (s *Server) Router() chi.Router {
 		)
 
 		r.Get("/", s.Index)
-		r.Post("/", s.ShortenURL)
-		r.Get("/{slug}", s.RedirectSlug)
-		// Forms don't support DELETE
-		r.Post("/{slug}/delete", s.DeleteLink)
+		r.Get("/{slug}", s.Redirect)
+	})
+
+	// Mount link routes
+	r.Group(func(r chi.Router) {
+		r.Use(
+			// Authentication
+			s.SetUser,
+		)
+
+		r.Post("/links", s.CreateLink)
+		r.Post("/links/{slug}/delete", s.DeleteLink)
 	})
 
 	// Mount user routes
@@ -66,8 +74,9 @@ func (s *Server) Router() chi.Router {
 
 		r.Get("/login", s.LoginForm)
 		r.Post("/login", s.Login)
-		r.Get("/register", s.RegisterForm)
-		r.Post("/register", s.Register)
+
+		r.Get("/users/new", s.CreateUserForm)
+		r.Post("/users", s.CreateUser)
 	})
 
 	// Override not found handler to prevent "404 page not found" from
