@@ -4,20 +4,27 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/gorilla/securecookie"
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/sirupsen/logrus"
 )
 
 // Server serves the website.
 type Server struct {
-	Port     string
-	Hostname string
-	Logger   logrus.FieldLogger
-	Database Database
+	Port           string
+	Hostname       string
+	AuthSecret     string
+	CookieHashKey  string
+	CookieBlockKey string
+	Logger         logrus.FieldLogger
+	Database       Database
+
+	cookie *securecookie.SecureCookie
 }
 
 // Listen listens for requests, blocking until an error occurs.
 func (s *Server) Listen() error {
+	s.cookie = securecookie.New([]byte(s.CookieHashKey), []byte(s.CookieBlockKey))
 	return http.ListenAndServe(s.Port, s.Router())
 }
 

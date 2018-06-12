@@ -11,7 +11,7 @@ import (
 
 // LoginForm renders the login form.
 func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
-	flash, _ := RetrieveFlash(w, r)
+	flash, _ := s.Flash(w, r)
 	executeTemplate(w, r, "layout.html", nil, "login.html", struct {
 		Flash Flash
 	}{
@@ -25,7 +25,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
-	flash, _ := RetrieveFlash(w, r)
+	flash, _ := s.Flash(w, r)
 	executeTemplate(w, r, "layout.html", nil, "users/new.html", struct {
 		Flash Flash
 	}{
@@ -46,8 +46,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if password != confirmPassword {
-		f := Flash{Failure: "Passwords didn't match"}
-		f.Save(w)
+		s.SetFlash(w, Flash{Failure: "Passwords didn't match"})
 
 		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
@@ -60,8 +59,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Error("failed to create user")
 
-		f := Flash{Failure: "Could not create user."}
-		f.Save(w)
+		s.SetFlash(w, Flash{Failure: "Could not create user."})
 
 		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
@@ -74,19 +72,16 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 		switch err.(errors.Error).Type {
 		case errors.AlreadyExists:
-			f := Flash{Failure: "Username already exists."}
-			f.Save(w)
+			s.SetFlash(w, Flash{Failure: "Username already exists."})
 		default:
-			f := Flash{Failure: "Could not create user."}
-			f.Save(w)
+			s.SetFlash(w, Flash{Failure: "Could not create user."})
 		}
 
 		http.Redirect(w, r, "/users/new", http.StatusFound)
 		return
 	}
 
-	f := Flash{Success: "Successfully registered user!"}
-	f.Save(w)
+	s.SetFlash(w, Flash{Success: "Successfully registered user!"})
 
 	http.Redirect(w, r, "/login", http.StatusFound)
 }

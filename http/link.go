@@ -30,7 +30,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		"username": user.Username,
 	}).Info("fetched links of user")
 
-	flash, _ := RetrieveFlash(w, r)
+	flash, _ := s.Flash(w, r)
 
 	executeTemplate(w, r, "layout.html", nil, "index.html", struct {
 		Flash    Flash
@@ -69,8 +69,7 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 			"err": err,
 		}).Error("failed to create link")
 
-		f := Flash{Failure: "Could not create link."}
-		f.Save(w)
+		s.SetFlash(w, Flash{Failure: "Could not create link."})
 
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
@@ -87,6 +86,8 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 	logrus.WithFields(logrus.Fields{
 		"slug": link.Slug,
 	}).Info("created link")
+
+	s.SetFlash(w, Flash{Success: "Successfully created link!"})
 
 	http.Redirect(w, r, "/", http.StatusFound)
 }
@@ -105,8 +106,7 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 
 		switch err.(errors.Error).Type {
 		case errors.Unauthorized:
-			f := Flash{Failure: "You can't delete the link!"}
-			f.Save(w)
+			s.SetFlash(w, Flash{Failure: "You can't delete the link!"})
 			http.Redirect(w, r, "/", http.StatusFound)
 		default:
 			w.WriteHeader(http.StatusInternalServerError)

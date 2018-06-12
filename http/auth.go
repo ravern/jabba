@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ravernkoh/jabba/auth"
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/ravernkoh/jabba/model"
 	"github.com/sirupsen/logrus"
@@ -20,29 +21,45 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 		var u *model.User
 
 		// Try to find in cookie
-		c, err := r.Cookie("user")
+		var token string
+		err := s.Cookie(r, "user", &token)
 		if err == nil {
-			// Try to fetch from database
-			u, err = s.Database.GetUser(c.Value)
+			// Decode the token
+			var username string
+			username, err = auth.ValidateToken(token, s.AuthSecret)
 			if err == nil {
 				logger.WithFields(logrus.Fields{
-					"username": c.Value,
-				}).Info("fetched user")
+					"token": token,
+				}).Info("decoded token")
 
-				// Update the last visit
-				u.LastVisit = time.Now()
-				if err = s.Database.UpdateUser(u); err != nil {
+				// Try to fetch from database
+				u, err = s.Database.GetUser(username)
+				if err == nil {
 					logger.WithFields(logrus.Fields{
-						"username": u.Username,
-					}).Warn("failed to update user")
+						"username": username,
+					}).Info("fetched user")
+
+					// Update the last visit
+					u.LastVisit = time.Now()
+					if err = s.Database.UpdateUser(u); err != nil {
+						logger.WithFields(logrus.Fields{
+							"username": u.Username,
+						}).Warn("failed to update user")
+					}
+				} else {
+					logger.WithFields(logrus.Fields{
+						"username": username,
+						"err":      err,
+					}).Warn("failed to fetch user")
 				}
 			} else {
 				logger.WithFields(logrus.Fields{
-					"username": c.Value,
-				}).Warn("invalid username found")
+					"token": token,
+					"err":   err,
+				}).Warn("failed to decode token")
 			}
 		} else {
-			logger.Info("failed to find user in cookie")
+			logger.Info("failed to find user cookie")
 		}
 
 		// Create new anonymous user, since either not found in cookie
@@ -61,11 +78,16 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 				return
 			}
 
-			http.SetCookie(w, &http.Cookie{
-				Name:  "user",
-				Value: u.Username,
-				Path:  "/",
-			})
+			token, err := auth.GenerateToken(u.Username, s.AuthSecret)
+			if err != nil {
+				logger.WithFields(logrus.Fields{
+					"err": err,
+				}).Error("failed to encode token")
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+
+			s.SetCookie(w, "user", token)
 
 			logger.Info("created new user")
 		}

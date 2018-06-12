@@ -8,6 +8,7 @@ github.com/dgrijalva/jwt-go                 v0.0.0-20180308231308-06ea1031745c
 github.com/go-chi/chi                       v0.0.0-20171222161133-e83ac2304db3
 github.com/gobuffalo/packr                  v1.11.0
 github.com/golang/protobuf                  v1.1.0
+github.com/gorilla/securecookie             v1.1.1
 github.com/joho/godotenv                    v1.2.0
 github.com/onsi/ginkgo                      v1.5.0
 github.com/onsi/gomega                      v1.4.0

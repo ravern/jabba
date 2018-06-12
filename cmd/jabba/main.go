@@ -27,6 +27,9 @@ func main() {
 		development         = os.Getenv("DEVELOPMENT") != ""
 		hostname            = os.Getenv("HOSTNAME")
 		port                = os.Getenv("PORT")
+		authSecret          = os.Getenv("AUTH_SECRET")
+		cookieHashKey       = os.Getenv("COOKIE_HASH_KEY")
+		cookieBlockKey      = os.Getenv("COOKIE_BLOCK_KEY")
 		databasePath        = os.Getenv("DATABASE_PATH")
 		databaseIntervalStr = os.Getenv("DATABASE_INTERVAL")
 	)
@@ -63,10 +66,13 @@ func main() {
 
 	// Start up the server
 	server := http.Server{
-		Port:     port,
-		Hostname: hostname,
-		Logger:   logger,
-		Database: &database,
+		Port:           port,
+		Hostname:       hostname,
+		AuthSecret:     authSecret,
+		CookieHashKey:  cookieHashKey,
+		CookieBlockKey: cookieBlockKey,
+		Logger:         logger,
+		Database:       &database,
 	}
 	// This is a lie!
 	logger.Infof("server started listening on %s", port)
