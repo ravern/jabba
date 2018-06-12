@@ -40,7 +40,9 @@ func main() {
 		Path: databasePath,
 	}
 	if err := database.Open(); err != nil {
-		logger.Errorf("failed to open database at %s", databasePath)
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Errorf("failed to open database at %s", databasePath)
 		os.Exit(1)
 	}
 	defer database.Close()

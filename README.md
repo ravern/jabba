@@ -13,8 +13,8 @@ $ go run bootstrap.go
 $ go get -u github.com/gobuffalo/packr/packr
 ```
 
-The development server can then be started. Static files can be reloaded without
-restarting the server.
+The development server can then be started. The server will be restarted 
+automatically when changes are made.
 ```bash
 $ mage development
 ```

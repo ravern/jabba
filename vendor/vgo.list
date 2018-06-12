@@ -1,5 +1,6 @@
 MODULE                                      VERSION
 github.com/ravernkoh/jabba                  -
+github.com/andreaskoch/go-fswatch           v1.0.0
 github.com/boltdb/bolt                      v1.3.1
 github.com/davecgh/go-spew                  v1.1.0
 github.com/dgrijalva/jwt-go                 v0.0.0-20180308231308-06ea1031745c

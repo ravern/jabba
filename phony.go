@@ -1,4 +1,13 @@
 package jabba
 
-// Empty file since doing `go build` in a directory with no files of the
-// appropriate build tag will result in an error...
+import (
+	fswatch "github.com/andreaskoch/go-fswatch"
+)
+
+// Since vgo does not look at all build tags, the magefile dependencies will
+// not be vendored. Thus, this file is used to import all the dependencies of
+// magefile.go.
+
+func init() {
+	fswatch.NewFileWatcher("", 0)
+}
