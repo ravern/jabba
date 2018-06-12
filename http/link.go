@@ -34,7 +34,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 
 	flash, _ := RetrieveFlash(w, r)
 
-	if err := executeTemplate(w, "layout.html", nil, "index.html", struct {
+	executeTemplate(w, r, "layout.html", nil, "index.html", struct {
 		Flash    Flash
 		Hostname string
 		Links    []*model.Link
@@ -42,13 +42,7 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		Flash:    flash,
 		Hostname: s.Hostname,
 		Links:    links,
-	}); err != nil {
-		logger.WithFields(logrus.Fields{
-			"err": err,
-		}).Error("failed to execute template")
-
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	})
 }
 
 // RedirectSlug redirects to the corresponding page from the slug.

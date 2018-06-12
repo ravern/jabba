@@ -12,17 +12,11 @@ import (
 // LoginForm renders the login form.
 func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := RetrieveFlash(w, r)
-	if err := executeTemplate(w, "layout.html", nil, "login.html", struct {
+	executeTemplate(w, r, "layout.html", nil, "login.html", struct {
 		Flash Flash
 	}{
 		Flash: flash,
-	}); err != nil {
-		middleware.Logger(r).WithFields(logrus.Fields{
-			"err": err,
-		}).Error("failed to execute template")
-
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	})
 }
 
 // Login attempts to log the user in.
@@ -32,17 +26,11 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 // RegisterForm renders the registration form.
 func (s *Server) RegisterForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := RetrieveFlash(w, r)
-	if err := executeTemplate(w, "layout.html", nil, "register.html", struct {
+	executeTemplate(w, r, "layout.html", nil, "register.html", struct {
 		Flash Flash
 	}{
 		Flash: flash,
-	}); err != nil {
-		middleware.Logger(r).WithFields(logrus.Fields{
-			"err": err,
-		}).Error("failed to execute template")
-
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	})
 }
 
 // Register attempts to register the user.

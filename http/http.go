@@ -4,10 +4,11 @@ package http
 import (
 	"bytes"
 	"html/template"
-	"io"
 	"net/http"
 
 	"github.com/gobuffalo/packr"
+	"github.com/ravernkoh/jabba/http/middleware"
+	"github.com/sirupsen/logrus"
 )
 
 // key is used within contexts as a key.
@@ -37,19 +38,32 @@ func init() {
 	})
 }
 
-func executeTemplate(w io.Writer, layout string, layoutData interface{}, name string, data interface{}) error {
+func executeTemplate(w http.ResponseWriter, r *http.Request, layout string, layoutData interface{}, name string, data interface{}) {
+	logger := middleware.Logger(r)
+
 	// Render template
 	var b bytes.Buffer
 	if err := templates.ExecuteTemplate(&b, name, data); err != nil {
-		return err
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to execute layout")
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	// Render layout with template as content
-	return templates.ExecuteTemplate(w, layout, struct {
+	if err := templates.ExecuteTemplate(w, layout, struct {
 		Content template.HTML
 		Data    interface{}
 	}{
 		Content: template.HTML(b.String()),
 		Data:    layoutData,
-	})
+	}); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to execute layout")
+
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
