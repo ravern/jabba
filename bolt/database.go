@@ -3,6 +3,7 @@ package bolt
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -18,8 +19,15 @@ const (
 
 // Database represents the database connection.
 type Database struct {
-	Path string
-	db   *bolt.DB
+	Path     string
+	Interval time.Duration // interval to write caches to the database
+
+	// Underlying bolt database instance
+	db *bolt.DB
+
+	// Usage counters for each slug
+	counts   map[string]int
+	countsMu sync.Mutex
 }
 
 // Open opens up a connection to the database.
@@ -29,6 +37,14 @@ func (d *Database) Open() error {
 		return err
 	}
 	d.db = db
+
+	d.counts = make(map[string]int)
+	go func() {
+		for {
+			time.Sleep(d.Interval)
+			d.updateLinkCounts()
+		}
+	}()
 
 	return nil
 }

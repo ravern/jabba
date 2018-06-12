@@ -4,6 +4,7 @@ package main
 import (
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -23,11 +24,22 @@ func init() {
 func main() {
 	// Get environment variables
 	var (
-		development  = os.Getenv("DEVELOPMENT") != ""
-		hostname     = os.Getenv("HOSTNAME")
-		port         = os.Getenv("PORT")
-		databasePath = os.Getenv("DATABASE_PATH")
+		development         = os.Getenv("DEVELOPMENT") != ""
+		hostname            = os.Getenv("HOSTNAME")
+		port                = os.Getenv("PORT")
+		databasePath        = os.Getenv("DATABASE_PATH")
+		databaseIntervalStr = os.Getenv("DATABASE_INTERVAL")
 	)
+	var databaseInterval int
+	if databaseIntervalStr == "" {
+		databaseInterval = 10
+	} else {
+		var err error
+		databaseInterval, err = strconv.Atoi(databaseIntervalStr)
+		if err != nil {
+			panic("DATABASE_INTERVAL must be an integer")
+		}
+	}
 
 	// Create the logger
 	logger := logrus.New()
@@ -37,7 +49,8 @@ func main() {
 
 	// Open the database connection
 	database := bolt.Database{
-		Path: databasePath,
+		Path:     databasePath,
+		Interval: time.Duration(databaseInterval) * time.Second,
 	}
 	if err := database.Open(); err != nil {
 		logger.WithFields(logrus.Fields{

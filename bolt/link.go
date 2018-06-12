@@ -70,17 +70,41 @@ func (d *Database) DeleteVisitorLink(slug string, v *model.Visitor) error {
 	})
 }
 
-// IncrementLinkCount increments the visit count of the given link.
-func (d *Database) IncrementLinkCount(l *model.Link) error {
-	count := l.Count
-	err := d.db.Update(func(tx *bolt.Tx) error {
-		l.Count++
-		return d.update(tx, "link", linksBucket, []byte(l.Slug), l)
-	})
-	if err != nil {
-		l.Count = count
+// IncrementLinkCount increments the usage count of the given link.
+func (d *Database) IncrementLinkCount(l *model.Link) {
+	d.countsMu.Lock()
+	defer d.countsMu.Unlock()
+
+	_, ok := d.counts[l.Slug]
+	if !ok {
+		d.counts[l.Slug] = 0
 	}
-	return err
+
+	d.counts[l.Slug]++
+	l.Count++
+}
+
+// updateLinkCounts writes the usage counts cache into the database.
+func (d *Database) updateLinkCounts() {
+	d.countsMu.Lock()
+	defer d.countsMu.Unlock()
+
+	d.db.Update(func(tx *bolt.Tx) error {
+		for slug, count := range d.counts {
+			var l *model.Link
+			if err := d.get(tx, "link", linksBucket, []byte(slug), &l); err != nil {
+				continue
+			}
+
+			l.Count += count
+
+			d.put(tx, "link", linksBucket, []byte(slug), l)
+		}
+
+		return nil
+	})
+
+	d.counts = make(map[string]int)
 }
 
 // GetLinks returns the links with the given slugs.

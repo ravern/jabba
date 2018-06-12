@@ -54,11 +54,7 @@ func (s *Server) RedirectSlug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.Database.IncrementLinkCount(link); err != nil {
-		middleware.Logger(r).WithFields(logrus.Fields{
-			"err": err,
-		}).Warn("failed to increment link count")
-	}
+	s.Database.IncrementLinkCount(link)
 
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }

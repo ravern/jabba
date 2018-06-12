@@ -11,7 +11,7 @@ type Database interface {
 	CreateVisitorLink(*model.Link, *model.Visitor) error
 	DeleteUserLink(slug string, u *model.User) error
 	DeleteVisitorLink(slug string, u *model.Visitor) error
-	IncrementLinkCount(*model.Link) error
+	IncrementLinkCount(*model.Link)
 	GetLinks(slugs []string) ([]*model.Link, error)
 	GetLink(slug string) (*model.Link, error)
 

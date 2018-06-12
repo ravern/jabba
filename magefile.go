@@ -60,6 +60,7 @@ func Development() error {
 
 		logrus.Debug("running the binary")
 		cmd = exec.Command("releases/jabba")
+		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Start(); err != nil {
 			logrus.Error("failed to start server: ", err)
