@@ -31,7 +31,6 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	}).Info("fetched links of user")
 
 	flash, _ := s.Flash(w, r)
-
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"index.css",
@@ -69,7 +68,6 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 		}).Error("failed to create link")
 
 		s.SetFlash(w, Flash{Failure: "Could not create link."})
-
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -87,7 +85,6 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 	}).Info("created link")
 
 	s.SetFlash(w, Flash{Success: "Successfully created link!"})
-
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
@@ -114,5 +111,6 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.SetFlash(w, Flash{Success: "Successfully deleted link!"})
 	http.Redirect(w, r, "/", http.StatusFound)
 }
