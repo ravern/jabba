@@ -57,7 +57,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
-		}).Error("failed to create user")
+		}).Warn("failed to create user")
 
 		s.SetFlash(w, Flash{Failure: "Could not create user."})
 

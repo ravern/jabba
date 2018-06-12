@@ -44,22 +44,22 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 					if err = s.Database.UpdateUser(u); err != nil {
 						logger.WithFields(logrus.Fields{
 							"username": u.Username,
-						}).Warn("failed to update user")
+						}).Error("failed to update user")
 					}
 				} else {
 					logger.WithFields(logrus.Fields{
 						"username": username,
 						"err":      err,
-					}).Warn("failed to fetch user")
+					}).Error("failed to fetch user")
 				}
 			} else {
 				logger.WithFields(logrus.Fields{
 					"token": token,
 					"err":   err,
-				}).Warn("failed to decode token")
+				}).Error("failed to decode token")
 			}
 		} else {
-			logger.Info("failed to find user cookie")
+			logger.Info("user cookie doesn't exist")
 		}
 
 		// Create new anonymous user, since either not found in cookie

@@ -19,8 +19,6 @@ func SetLogger(l logrus.FieldLogger) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			l = l.WithFields(logrus.Fields{
 				"request_id": r.Context().Value(middleware.RequestIDKey),
-				"path":       r.URL.Path,
-				"method":     r.Method,
 			})
 			ctx := context.WithValue(r.Context(), keyLogger, l)
 
@@ -43,7 +41,10 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rw := responseWriter{w: w}
 		l := Logger(r)
-		l.Info("received request")
+		l.WithFields(logrus.Fields{
+			"path":   r.URL.Path,
+			"method": r.Method,
+		}).Info("received request")
 
 		next.ServeHTTP(&rw, r)
 
