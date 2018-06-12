@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -29,7 +30,7 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 			username, err = auth.ValidateToken(token, s.AuthSecret)
 			if err == nil {
 				logger.WithFields(logrus.Fields{
-					"token": token,
+					"token": fmt.Sprintf("%s...", token[:10]),
 				}).Info("decoded token")
 
 				// Try to fetch from database
@@ -54,8 +55,7 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 				}
 			} else {
 				logger.WithFields(logrus.Fields{
-					"token": token,
-					"err":   err,
+					"err": err,
 				}).Error("failed to decode token")
 			}
 		} else {
