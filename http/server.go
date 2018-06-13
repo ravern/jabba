@@ -89,6 +89,7 @@ func (s *Server) Router() chi.Router {
 
 		r.Get("/login", s.LoginForm)
 		r.Post("/login", s.Login)
+		r.Post("/logout", s.Logout)
 
 		r.Get("/users/new", s.CreateUserForm)
 		r.Post("/users", s.CreateUser)

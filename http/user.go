@@ -164,6 +164,12 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+// Logout logs the user out.
+func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
+	s.DeleteCookie(w, "user")
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)

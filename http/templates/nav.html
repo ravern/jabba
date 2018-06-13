@@ -2,8 +2,21 @@
     <div class="left">
         <a href="/"><h5>Jabba</h5></a>
     </div>
-    <div class="right">
-        <a href="/login" class="button login">LOGIN</a>
-        <a href="/users/new" class="button button-primary">REGISTER</a>
-    </div>
+    {{ if eq .Username "" }}
+        <div class="right">
+            <a href="/login" class="button login">LOGIN</a>
+            <a href="/users/new" class="button button-primary">REGISTER</a>
+        </div>
+    {{ else }}
+        <div class="right">
+            <a href="/user" class="username">{{ .Username }}</a>
+            <form
+                action="/logout"
+                method="POST"
+                onsubmit="return confirm('Are you sure?');"
+            >
+                <input type="submit" value="LOGOUT" class="button-primary delete" />
+            </form>
+        </div>
+    {{ end }}
 </nav>

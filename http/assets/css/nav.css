@@ -22,6 +22,30 @@ header nav .right .login {
     margin-right: 2.0rem;
 }
 
+header nav .right .username {
+    display: inline-block;
+    margin-right: 2.0rem;
+}
+
+header nav .right form {
+    display: inline-block;
+    margin-bottom: 0;
+}
+
+header nav .right form input {
+    margin-bottom: 0;
+}
+
+header nav .right form .delete {
+    background-color: #e33;
+    border-color: #e33;
+}
+
+header nav .right form .delete:hover {
+    background-color: #d22;
+    border-color: #d22;
+}
+
 header nav .right a.button {
     margin-bottom: 0;
 }

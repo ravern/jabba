@@ -82,10 +82,17 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 	}).Info("got links of user")
 
 	flash, _ := s.Flash(w, r)
+
+	var username string
+	if user.Registered {
+		username = user.Username
+	}
+
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"index.css",
 	}, nil, "index.html", map[string]interface{}{
+		"Username": username,
 		"Flash":    flash,
 		"Hostname": s.Hostname,
 		"Links":    links,
