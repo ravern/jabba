@@ -8,24 +8,33 @@ import (
 
 // CreateLink creates a new link and adds that link to the user.
 func (d *Database) CreateLink(l *model.Link, u *model.User) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
 			return err
 		}
 		u.LinkSlugs = append(u.LinkSlugs, l.Slug)
 		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
 	})
+	if err != nil {
+		if i, ok := u.FindLinkSlug(l.Slug); ok {
+			u.LinkSlugs = append(u.LinkSlugs[:i], u.LinkSlugs[i+1:]...)
+		}
+	}
+	return err
 }
 
-// DeleteLink deletes the given link and removes that link
-// from the user.
+// DeleteLink deletes the given link and removes that link from the user.
 func (d *Database) DeleteLink(l *model.Link, u *model.User) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	var (
+		i  int
+		ok bool
+	)
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		if err := d.delete(tx, "links", linksBucket, []byte(l.Slug)); err != nil {
 			return err
 		}
 
-		i, ok := u.FindLinkSlug(l.Slug)
+		i, ok = u.FindLinkSlug(l.Slug)
 		if !ok {
 			return errors.Error{
 				Type:    errors.Unauthorized,
@@ -36,6 +45,10 @@ func (d *Database) DeleteLink(l *model.Link, u *model.User) error {
 
 		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
 	})
+	if err != nil && ok {
+		u.LinkSlugs = append(u.LinkSlugs[:i], append([]string{l.Slug}, u.LinkSlugs[i:]...)...)
+	}
+	return err
 }
 
 // IncrementLinkCount increments the usage count of the given link.
@@ -77,7 +90,11 @@ func (d *Database) updateLinkCounts() {
 
 // UpdateLinkSlug updates the given link, including changes to the slug.
 func (d *Database) UpdateLinkSlug(slug string, l *model.Link, u *model.User) error {
-	return d.db.Update(func(tx *bolt.Tx) error {
+	var (
+		i  int
+		ok bool
+	)
+	err := d.db.Update(func(tx *bolt.Tx) error {
 		if slug == l.Slug {
 			return d.update(tx, "link", linksBucket, []byte(l.Slug), l)
 		}
@@ -89,6 +106,7 @@ func (d *Database) UpdateLinkSlug(slug string, l *model.Link, u *model.User) err
 			return err
 		}
 
+		var ok bool
 		i, ok := u.FindLinkSlug(slug)
 		if !ok {
 			return errors.Error{
@@ -100,6 +118,10 @@ func (d *Database) UpdateLinkSlug(slug string, l *model.Link, u *model.User) err
 
 		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
 	})
+	if err != nil && ok {
+		u.LinkSlugs[i] = slug
+	}
+	return err
 }
 
 // GetLinks returns the links with the given slugs.
