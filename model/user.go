@@ -32,7 +32,7 @@ func NewAnonymousUser() *User {
 // NewUser creates a new user.
 //
 // The given password will be hashed and stored in the password field.
-func NewUser(username string, email string, password string, linkSlugs []string) (*User, error) {
+func NewUser(username string, email string, password string) (*User, error) {
 	// Check password length manually since after hashing its all the same
 	if len(password) < 4 {
 		return nil, errors.Error{
@@ -57,15 +57,24 @@ func NewUser(username string, email string, password string, linkSlugs []string)
 		Password:   string(passwordHash),
 		Joined:     time.Now(),
 		LastVisit:  time.Now(),
-		LinkSlugs:  linkSlugs,
 	}
 
-	// Validate
-	if _, err := govalidator.ValidateStruct(u); err != nil {
+	if err := u.Validate(); err != nil {
 		return nil, newValidationError("user", err)
 	}
 
 	return u, nil
+}
+
+// Validate validates the user.
+func (u *User) Validate() error {
+	_, err := govalidator.ValidateStruct(u)
+	return err
+}
+
+// CheckPassword checks whether the given password is correct.
+func (u *User) CheckPassword(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 }
 
 // FindLinkSlug searches for a slug that belongs to the user and returns its

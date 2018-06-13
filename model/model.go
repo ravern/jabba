@@ -5,12 +5,19 @@ import (
 	"fmt"
 	"math/rand"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/ravernkoh/jabba/errors"
 )
 
 func init() {
 	govalidator.SetFieldsRequiredByDefault(true)
+}
+
+// DummyCheckPassword is a fake password check to prevent timing attacks.
+func DummyCheckPassword() {
+	bcrypt.CompareHashAndPassword([]byte(""), []byte(""))
 }
 
 // alphabet is the alphabet.

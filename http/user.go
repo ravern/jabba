@@ -106,16 +106,62 @@ func (s *Server) User(r *http.Request) *model.User {
 // LoginForm renders the login form.
 func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeTemplate(w, r, "layout.html", []string{
-		"nav.css",
-		"login.css",
-	}, nil, "login.html", map[string]interface{}{
-		"Flash": flash,
-	})
+	executeLoginFormTemplate(w, r, flash, "")
 }
 
 // Login attempts to log the user in.
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
+
+	var (
+		username = r.FormValue("username")
+		password = r.FormValue("password")
+	)
+
+	var f Flash
+
+	u, err := s.Database.GetUser(username)
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("failed to find user")
+
+		model.DummyCheckPassword()
+
+		f.Failure = "Invalid username or password."
+		executeLoginFormTemplate(w, r, f, username)
+		return
+	}
+
+	if !u.Registered {
+		logger.Warn("user not registered")
+		f.Failure = "Invalid username or password."
+		executeLoginFormTemplate(w, r, f, username)
+		return
+	}
+
+	if err := u.CheckPassword(password); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("wrong password")
+
+		f.Failure = "Invalid username or password."
+		executeLoginFormTemplate(w, r, f, username)
+		return
+	}
+
+	token, err := auth.GenerateToken(u.Username, s.AuthSecret)
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to encode token")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	s.SetCookie(w, "user", token)
+
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // CreateUserForm renders the user creation form.
@@ -147,7 +193,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := model.NewUser(username, email, password, user.LinkSlugs)
+	u, err := model.NewUser(username, email, password)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
@@ -162,8 +208,10 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user.Registered {
+		u.LinkSlugs = []string{}
 		err = s.Database.CreateUser(u)
 	} else {
+		u.LinkSlugs = user.LinkSlugs
 		err = s.Database.UpdateUserUsername(user.Username, u)
 	}
 	if err != nil {
@@ -184,6 +232,16 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	s.SetFlash(w, Flash{Success: "Successfully registered user!"})
 	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
+func executeLoginFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, username string) {
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"login.css",
+	}, nil, "login.html", map[string]interface{}{
+		"Flash":    f,
+		"Username": username,
+	})
 }
 
 func executeCreateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {

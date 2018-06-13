@@ -9,7 +9,7 @@
         {{ template "flash.html" . }}
         <form method="POST">
             <div class="input">
-                <input type="text" placeholder="Username" name="username" />
+                <input type="text" placeholder="Username" name="username" value="{{ .Username }}" />
             </div>
             <div class="input">
                 <input type="password" placeholder="Password" name="password" />
