@@ -2,7 +2,6 @@ package bolt
 
 import (
 	"github.com/boltdb/bolt"
-	"github.com/ravernkoh/jabba/errors"
 	"github.com/ravernkoh/jabba/model"
 )
 
@@ -22,13 +21,11 @@ func (d *Database) UpdateUser(u *model.User) error {
 
 // UpdateUserUsername updates the given user, including changes to the username.
 func (d *Database) UpdateUserUsername(username string, u *model.User) error {
-	if username == u.Username {
-		return errors.Error{
-			Type:    errors.AlreadyExists,
-			Message: "bolt: user already exists",
-		}
-	}
 	return d.db.Update(func(tx *bolt.Tx) error {
+		if username == u.Username {
+			return d.update(tx, "user", usersBucket, []byte(u.Username), u)
+		}
+
 		if err := d.delete(tx, "user", usersBucket, []byte(username)); err != nil {
 			return err
 		}

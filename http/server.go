@@ -75,6 +75,7 @@ func (s *Server) Router() chi.Router {
 				s.RequireLink,
 			)
 			r.Get("/links/{slug}/edit", s.UpdateLinkForm)
+			r.Post("/links/{slug}", s.UpdateLink)
 			r.Post("/links/{slug}/delete", s.DeleteLink)
 		})
 	})

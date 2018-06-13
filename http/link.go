@@ -142,15 +142,42 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 // UpdateLinkForm renders to form to update the link.
 func (s *Server) UpdateLinkForm(w http.ResponseWriter, r *http.Request) {
 	link := s.Link(r)
-
 	flash, _ := s.Flash(w, r)
-	executeTemplate(w, r, "layout.html", []string{
-		"nav.css",
-		"links/edit.css",
-	}, nil, "links/edit.html", map[string]interface{}{
-		"Flash": flash,
-		"Link":  link,
-	})
+	executeUpdateLinkFormTemplate(w, r, flash, link)
+}
+
+// UpdateLink updates the link.
+func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
+	user := s.User(r)
+	link := s.Link(r)
+
+	slug := link.Slug
+	link.Slug = r.FormValue("slug")
+	link.Title = r.FormValue("title")
+	link.URL = r.FormValue("url")
+
+	var f Flash
+
+	if err := s.Database.UpdateLinkSlug(slug, link, user); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to update link")
+
+		switch err.(errors.Error).Type {
+		case errors.AlreadyExists:
+			f.Failure = "Slug already exists."
+		default:
+			f.Failure = "Could not update link."
+		}
+
+		link.Slug = slug
+		executeUpdateLinkFormTemplate(w, r, f, link)
+		return
+	}
+
+	s.SetFlash(w, Flash{Success: "Successfully updated link!"})
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 // DeleteLink deletes the link.
@@ -177,4 +204,14 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 
 	s.SetFlash(w, Flash{Success: "Successfully deleted link!"})
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, l *model.Link) {
+	executeTemplate(w, r, "layout.html", []string{
+		"nav.css",
+		"links/edit.css",
+	}, nil, "links/edit.html", map[string]interface{}{
+		"Flash": f,
+		"Link":  l,
+	})
 }

@@ -75,6 +75,33 @@ func (d *Database) updateLinkCounts() {
 	d.counts = make(map[string]int)
 }
 
+// UpdateLinkSlug updates the given link, including changes to the slug.
+func (d *Database) UpdateLinkSlug(slug string, l *model.Link, u *model.User) error {
+	return d.db.Update(func(tx *bolt.Tx) error {
+		if slug == l.Slug {
+			return d.update(tx, "link", linksBucket, []byte(l.Slug), l)
+		}
+
+		if err := d.delete(tx, "link", linksBucket, []byte(slug)); err != nil {
+			return err
+		}
+		if err := d.create(tx, "link", linksBucket, []byte(l.Slug), l); err != nil {
+			return err
+		}
+
+		i, ok := u.FindLinkSlug(slug)
+		if !ok {
+			return errors.Error{
+				Type:    errors.Unauthorized,
+				Message: "bolt: failed to find link in user",
+			}
+		}
+		u.LinkSlugs[i] = l.Slug
+
+		return d.update(tx, "user", usersBucket, []byte(u.Username), u)
+	})
+}
+
 // GetLinks returns the links with the given slugs.
 func (d *Database) GetLinks(slugs []string) ([]*model.Link, error) {
 	var ll []*model.Link
