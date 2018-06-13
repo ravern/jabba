@@ -10,7 +10,7 @@ import (
 
 // Link represents a shortened link.
 type Link struct {
-	Slug    string    `json:"slug" valid:"-"`
+	Slug    string    `json:"slug" valid:"stringlength(6|10)"`
 	Title   string    `json:"title" valid:"-"`
 	URL     string    `json:"url" valid:"url"`
 	Created time.Time `json:"created" valid:"-"`
@@ -53,10 +53,15 @@ func NewLink(url string) (*Link, error) {
 		Created: time.Now(),
 	}
 
-	// Validate
-	if _, err := govalidator.ValidateStruct(l); err != nil {
+	if err := l.Validate(); err != nil {
 		return nil, err
 	}
 
 	return l, nil
+}
+
+// Validate validates the link.
+func (l *Link) Validate() error {
+	_, err := govalidator.ValidateStruct(l)
+	return err
 }

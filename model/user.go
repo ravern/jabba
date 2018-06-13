@@ -10,7 +10,7 @@ import (
 
 // User represents a registered user.
 type User struct {
-	Username   string    `json:"username" valid:"-"`
+	Username   string    `json:"username" valid:"stringlength(2|20)"`
 	Registered bool      `json:"registered" valid:"-"`
 	Email      string    `json:"email" valid:"email"`
 	Password   string    `json:"password" valid:"-"`

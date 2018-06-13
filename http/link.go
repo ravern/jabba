@@ -159,6 +159,18 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 
 	var f Flash
 
+	if err := link.Validate(); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("failed to update link")
+
+		f.Failure = "Could not update link."
+
+		link.Slug = slug
+		executeUpdateLinkFormTemplate(w, r, f, link)
+		return
+	}
+
 	if err := s.Database.UpdateLinkSlug(slug, link, user); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,

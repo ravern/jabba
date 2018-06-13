@@ -147,8 +147,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var err error
-	user, err = model.NewUser(username, email, password, user.LinkSlugs)
+	u, err := model.NewUser(username, email, password, user.LinkSlugs)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
@@ -162,7 +161,12 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.Database.UpdateUserUsername(s.User(r).Username, user); err != nil {
+	if user.Registered {
+		err = s.Database.CreateUser(u)
+	} else {
+		err = s.Database.UpdateUserUsername(user.Username, u)
+	}
+	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
 		}).Error("failed to update user")
@@ -174,7 +178,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 			f.Failure = "Could not create user."
 		}
 
-		executeCreateUserFormTemplate(w, r, f, user)
+		executeCreateUserFormTemplate(w, r, f, u)
 		return
 	}
 
