@@ -5,31 +5,34 @@ import (
 )
 
 // notFound renders the 404 page.
-func notFound(w http.ResponseWriter, r *http.Request) {
+func (s *Server) notFound(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"error.css",
 	}, nil, "error.html", map[string]interface{}{
-		"Message": "404 Not Found",
+		"CurrentUsername": s.currentUsername(r),
+		"Message":         "404 Not Found",
 	})
 }
 
 // unauthorized renders the 401 page.
-func unauthorized(w http.ResponseWriter, r *http.Request) {
+func (s *Server) unauthorized(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"error.css",
 	}, nil, "error.html", map[string]interface{}{
-		"Message": "401 Unauthorized",
+		"CurrentUsername": s.currentUsername(r),
+		"Message":         "401 Unauthorized",
 	})
 }
 
 // internalServerError renders the 500 page.
-func internalServerError(w http.ResponseWriter, r *http.Request) {
+func (s *Server) internalServerError(w http.ResponseWriter, r *http.Request) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"error.css",
 	}, nil, "error.html", map[string]interface{}{
-		"Message": "500 Internal Server Error",
+		"CurrentUsername": s.currentUsername(r),
+		"Message":         "500 Internal Server Error",
 	})
 }

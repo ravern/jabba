@@ -2,14 +2,14 @@
     <div class="left">
         <a href="/"><h5>Jabba</h5></a>
     </div>
-    {{ if eq .Username "" }}
+    {{ if eq .CurrentUsername "" }}
         <div class="right">
             <a href="/login" class="button login">LOGIN</a>
             <a href="/users/new" class="button button-primary">REGISTER</a>
         </div>
     {{ else }}
         <div class="right">
-            <a href="/user" class="username">{{ .Username }}</a>
+            <a href="/user" class="username">{{ .CurrentUsername }}</a>
             <form
                 action="/logout"
                 method="POST"

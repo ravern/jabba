@@ -106,7 +106,7 @@ func (s *Server) User(r *http.Request) *model.User {
 // LoginForm renders the login form.
 func (s *Server) LoginForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeLoginFormTemplate(w, r, flash, "")
+	s.executeLoginFormTemplate(w, r, flash, "")
 }
 
 // Login attempts to log the user in.
@@ -129,14 +129,14 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		model.DummyCheckPassword()
 
 		f.Failure = "Invalid username or password."
-		executeLoginFormTemplate(w, r, f, username)
+		s.executeLoginFormTemplate(w, r, f, username)
 		return
 	}
 
 	if !u.Registered {
 		logger.Warn("user not registered")
 		f.Failure = "Invalid username or password."
-		executeLoginFormTemplate(w, r, f, username)
+		s.executeLoginFormTemplate(w, r, f, username)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 		}).Warn("wrong password")
 
 		f.Failure = "Invalid username or password."
-		executeLoginFormTemplate(w, r, f, username)
+		s.executeLoginFormTemplate(w, r, f, username)
 		return
 	}
 
@@ -173,7 +173,7 @@ func (s *Server) Logout(w http.ResponseWriter, r *http.Request) {
 // CreateUserForm renders the user creation form.
 func (s *Server) CreateUserForm(w http.ResponseWriter, r *http.Request) {
 	flash, _ := s.Flash(w, r)
-	executeCreateUserFormTemplate(w, r, flash, &model.User{})
+	s.executeCreateUserFormTemplate(w, r, flash, &model.User{})
 }
 
 // CreateUser attempts to create the user.
@@ -192,7 +192,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	if password != confirmPassword {
 		f.Failure = "Passwords didn't match"
-		executeCreateUserFormTemplate(w, r, f, &model.User{
+		s.executeCreateUserFormTemplate(w, r, f, &model.User{
 			Username: username,
 			Email:    email,
 		})
@@ -206,7 +206,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}).Warn("failed to create user")
 
 		f.Failure = "Could not create user."
-		executeCreateUserFormTemplate(w, r, f, &model.User{
+		s.executeCreateUserFormTemplate(w, r, f, &model.User{
 			Username: username,
 			Email:    email,
 		})
@@ -232,7 +232,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 			f.Failure = "Could not create user."
 		}
 
-		executeCreateUserFormTemplate(w, r, f, u)
+		s.executeCreateUserFormTemplate(w, r, f, u)
 		return
 	}
 
@@ -240,22 +240,32 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
-func executeLoginFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, username string) {
+func (s *Server) currentUsername(r *http.Request) string {
+	user := s.User(r)
+	if user.Registered {
+		return user.Username
+	}
+	return ""
+}
+
+func (s *Server) executeLoginFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, username string) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"login.css",
 	}, nil, "login.html", map[string]interface{}{
-		"Flash":    f,
-		"Username": username,
+		"CurrentUsername": s.currentUsername(r),
+		"Flash":           f,
+		"Username":        username,
 	})
 }
 
-func executeCreateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {
+func (s *Server) executeCreateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"users/new.css",
 	}, nil, "users/new.html", map[string]interface{}{
-		"Flash": f,
-		"User":  u,
+		"CurrentUsername": s.currentUsername(r),
+		"Flash":           f,
+		"User":            u,
 	})
 }

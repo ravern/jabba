@@ -83,19 +83,14 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 
 	flash, _ := s.Flash(w, r)
 
-	var username string
-	if user.Registered {
-		username = user.Username
-	}
-
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"index.css",
 	}, nil, "index.html", map[string]interface{}{
-		"Username": username,
-		"Flash":    flash,
-		"Hostname": s.Hostname,
-		"Links":    links,
+		"CurrentUsername": s.currentUsername(r),
+		"Flash":           flash,
+		"Hostname":        s.Hostname,
+		"Links":           links,
 	})
 }
 
@@ -150,7 +145,7 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 func (s *Server) UpdateLinkForm(w http.ResponseWriter, r *http.Request) {
 	link := s.Link(r)
 	flash, _ := s.Flash(w, r)
-	executeUpdateLinkFormTemplate(w, r, flash, link)
+	s.executeUpdateLinkFormTemplate(w, r, flash, link)
 }
 
 // UpdateLink updates the link.
@@ -174,7 +169,7 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		f.Failure = "Could not update link."
 
 		link.Slug = slug
-		executeUpdateLinkFormTemplate(w, r, f, link)
+		s.executeUpdateLinkFormTemplate(w, r, f, link)
 		return
 	}
 
@@ -191,7 +186,7 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		}
 
 		link.Slug = slug
-		executeUpdateLinkFormTemplate(w, r, f, link)
+		s.executeUpdateLinkFormTemplate(w, r, f, link)
 		return
 	}
 
@@ -225,12 +220,13 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, l *model.Link) {
+func (s *Server) executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, l *model.Link) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"links/edit.css",
 	}, nil, "links/edit.html", map[string]interface{}{
-		"Flash": f,
-		"Link":  l,
+		"CurrentUsername": s.currentUsername(r),
+		"Flash":           f,
+		"Link":            l,
 	})
 }

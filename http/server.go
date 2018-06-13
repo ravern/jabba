@@ -40,8 +40,9 @@ func (s *Server) Router() chi.Router {
 		middleware.LogRequest,
 
 		// Error pages
-		middleware.ErrorPage(http.StatusNotFound, notFound),
-		middleware.ErrorPage(http.StatusInternalServerError, internalServerError),
+		middleware.ErrorPage(http.StatusNotFound, s.notFound),
+		middleware.ErrorPage(http.StatusInternalServerError, s.internalServerError),
+		middleware.ErrorPage(http.StatusUnauthorized, s.unauthorized),
 
 		// Response
 		middleware.SetContentType("text/html; charset=utf-8"),
