@@ -72,14 +72,14 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 		logger.WithFields(logrus.Fields{
 			"username": user.Username,
 			"err":      err,
-		}).Error("failed to fetch links of user")
+		}).Error("failed to get links of user")
 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	logger.WithFields(logrus.Fields{
 		"username": user.Username,
-	}).Info("fetched links of user")
+	}).Info("got links of user")
 
 	flash, _ := s.Flash(w, r)
 	executeTemplate(w, r, "layout.html", []string{

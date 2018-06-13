@@ -34,12 +34,12 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 					"token": fmt.Sprintf("%s...", token[:10]),
 				}).Info("decoded token")
 
-				// Try to fetch from database
+				// Try to get from database
 				u, err = s.Database.GetUser(username)
 				if err == nil {
 					logger.WithFields(logrus.Fields{
 						"username": username,
-					}).Info("fetched user")
+					}).Info("got user")
 
 					// Update the last visit
 					u.LastVisit = time.Now()
@@ -52,7 +52,7 @@ func (s *Server) SetUser(next http.Handler) http.Handler {
 					logger.WithFields(logrus.Fields{
 						"username": username,
 						"err":      err,
-					}).Error("failed to fetch user")
+					}).Error("failed to get user")
 				}
 			} else {
 				logger.WithFields(logrus.Fields{
