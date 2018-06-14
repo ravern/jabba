@@ -191,7 +191,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var f Flash
 
 	if password != confirmPassword {
-		f.Failure = "Passwords didn't match"
+		f.Failure = "Passwords didn't match!"
 		s.executeCreateUserFormTemplate(w, r, f, &model.User{
 			Username: username,
 			Email:    email,
@@ -199,7 +199,7 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := model.NewUser(username, email, password)
+	u, err := model.NewUser(username, email)
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
@@ -210,6 +210,22 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 			Username: username,
 			Email:    email,
 		})
+		return
+	}
+
+	if err := u.SetPassword(password, confirmPassword); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("failed to set password on user")
+
+		switch err.(errors.Error).Type {
+		case errors.NotMatched:
+			f.Failure = "Passwords didn't match!"
+		default:
+			f.Failure = "Could not create user."
+		}
+
+		s.executeCreateUserFormTemplate(w, r, f, u)
 		return
 	}
 
@@ -240,12 +256,110 @@ func (s *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
-func (s *Server) currentUsername(r *http.Request) string {
+// UpdateUserForm renders the user update form.
+func (s *Server) UpdateUserForm(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
 	user := s.User(r)
-	if user.Registered {
-		return user.Username
+
+	if !user.Registered {
+		logger.Warn("unauthorized update user")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
 	}
-	return ""
+
+	flash, _ := s.Flash(w, r)
+	s.executeUpdateUserFormTemplate(w, r, flash, user)
+}
+
+// UpdateUser attempts to update the user.
+func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
+	user := s.User(r)
+
+	username := user.Username
+	user.Username = r.FormValue("username")
+	user.Email = r.FormValue("email")
+
+	var (
+		password        = r.FormValue("password")
+		newPassword     = r.FormValue("new_password")
+		confirmPassword = r.FormValue("confirm_password")
+	)
+
+	var f Flash
+
+	if err := user.CheckPassword(password); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("unauthorized user update")
+
+		f.Failure = "Invalid password!"
+		s.executeUpdateUserFormTemplate(w, r, f, user)
+		return
+	}
+
+	if err := user.SetPassword(newPassword, confirmPassword); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("could not set password on user")
+
+		switch err.(errors.Error).Type {
+		case errors.NotMatched:
+			f.Failure = "Passwords didn't match!"
+		default:
+			f.Failure = "Could not update user."
+		}
+
+		s.executeUpdateUserFormTemplate(w, r, f, user)
+		return
+	}
+
+	if err := user.Validate(); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Warn("failed user validation")
+
+		f.Failure = "Could not update user."
+
+		user.Username = username
+		s.executeUpdateUserFormTemplate(w, r, f, user)
+		return
+	}
+
+	if err := s.Database.UpdateUserUsername(username, user); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to update user")
+
+		switch err.(errors.Error).Type {
+		case errors.AlreadyExists:
+			f.Failure = "User already exists."
+		default:
+			f.Failure = "Could not update user."
+		}
+
+		user.Username = username
+		s.executeUpdateUserFormTemplate(w, r, f, user)
+		return
+	}
+
+	logger.WithFields(logrus.Fields{
+		"username": user.Username,
+	}).Info("updated user")
+
+	s.SetFlash(w, Flash{Success: "Successfully updated user!"})
+	http.Redirect(w, r, "/user/edit", http.StatusFound)
+}
+
+func (s *Server) currentUsername(r *http.Request) string {
+	user, ok := r.Context().Value(keyUser).(*model.User)
+	if !ok {
+		return ""
+	}
+	if !user.Registered {
+		return ""
+	}
+	return user.Username
 }
 
 func (s *Server) executeLoginFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, username string) {
@@ -260,12 +374,24 @@ func (s *Server) executeLoginFormTemplate(w http.ResponseWriter, r *http.Request
 }
 
 func (s *Server) executeCreateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {
+	s.executeUserFormTemplate(w, r, f, u, "Register", "REGISTER", "/users", false)
+}
+
+func (s *Server) executeUpdateUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User) {
+	s.executeUserFormTemplate(w, r, f, u, "User", "UPDATE", "/user", true)
+}
+
+func (s *Server) executeUserFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, u *model.User, title string, submit string, action string, update bool) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
-		"users/new.css",
-	}, nil, "users/new.html", map[string]interface{}{
+		"users/form.css",
+	}, nil, "users/form.html", map[string]interface{}{
 		"CurrentUsername": s.currentUsername(r),
 		"Flash":           f,
 		"User":            u,
+		"Title":           title,
+		"Submit":          submit,
+		"Action":          action,
+		"Update":          update,
 	})
 }

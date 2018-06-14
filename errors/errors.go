@@ -15,6 +15,7 @@ const (
 	NotFound Type = iota
 	NotPut
 	NotDeleted
+	NotMatched
 	Unauthorized
 	Invalid
 	AlreadyExists

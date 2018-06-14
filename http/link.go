@@ -164,7 +164,7 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	if err := link.Validate(); err != nil {
 		logger.WithFields(logrus.Fields{
 			"err": err,
-		}).Warn("failed to update link")
+		}).Warn("failed link validation")
 
 		f.Failure = "Could not update link."
 

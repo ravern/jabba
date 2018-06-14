@@ -30,31 +30,11 @@ func NewAnonymousUser() *User {
 }
 
 // NewUser creates a new user.
-//
-// The given password will be hashed and stored in the password field.
-func NewUser(username string, email string, password string) (*User, error) {
-	// Check password length manually since after hashing its all the same
-	if len(password) < 4 {
-		return nil, errors.Error{
-			Type:    errors.Invalid,
-			Message: "user: invalid",
-		}
-	}
-
-	// Hash the passwords (use default cost)
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
-	if err != nil {
-		return nil, errors.Error{
-			Type:    errors.FailedHash,
-			Message: "user: failed to hash password",
-		}
-	}
-
+func NewUser(username string, email string) (*User, error) {
 	u := &User{
 		Username:   username,
 		Registered: true,
 		Email:      email,
-		Password:   string(passwordHash),
 		Joined:     time.Now(),
 		LastVisit:  time.Now(),
 	}
@@ -70,6 +50,39 @@ func NewUser(username string, email string, password string) (*User, error) {
 func (u *User) Validate() error {
 	_, err := govalidator.ValidateStruct(u)
 	return err
+}
+
+// SetPassword ensures the passwords are equal, generates the hash and then sets
+// it on the user.
+func (u *User) SetPassword(password string, confirmPassword string) error {
+	// Check password length manually since after hashing its all the same
+	if len(password) < 4 {
+		return errors.Error{
+			Type:    errors.Invalid,
+			Message: "user: invalid",
+		}
+	}
+
+	// Check whether the password matches.
+	if password != confirmPassword {
+		return errors.Error{
+			Type:    errors.NotMatched,
+			Message: "user: passwords don't match",
+		}
+	}
+
+	// Hash the passwords (use default cost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), -1)
+	if err != nil {
+		return errors.Error{
+			Type:    errors.FailedHash,
+			Message: "user: failed to hash password",
+		}
+	}
+
+	u.Password = string(passwordHash)
+
+	return nil
 }
 
 // CheckPassword checks whether the given password is correct.

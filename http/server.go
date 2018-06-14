@@ -94,6 +94,8 @@ func (s *Server) Router() chi.Router {
 
 		r.Get("/users/new", s.CreateUserForm)
 		r.Post("/users", s.CreateUser)
+		r.Get("/user/edit", s.UpdateUserForm)
+		r.Post("/user", s.UpdateUser)
 	})
 
 	// Override not found handler to prevent "404 page not found" from

@@ -5,6 +5,7 @@
 </header>
 <main>
     <div class="container">
+        <h3>Link</h3>
         {{ template "flash.html" . }}
         <form action="/links/{{ .Link.Slug }}" method="POST">
             <div class="input">
@@ -17,7 +18,7 @@
                 <input type="url" placeholder="URL" name="url" value="{{ .Link.URL }}" />
             </div>
             <div class="input">
-                <input type="submit" value="SAVE" />
+                <input type="submit" value="UPDATE" />
             </div>
         </form>
     </div>
