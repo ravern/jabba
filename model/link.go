@@ -10,9 +10,9 @@ import (
 
 // Link represents a shortened link.
 type Link struct {
-	Slug    string    `json:"slug" valid:"stringlength(6|10)"`
-	Title   string    `json:"title" valid:"-"`
-	URL     string    `json:"url" valid:"url"`
+	Slug    string    `json:"slug" valid:"stringlength(6|10),required"`
+	Title   string    `json:"title" valid:"required"`
+	URL     string    `json:"url" valid:"url,required"`
 	Created time.Time `json:"created" valid:"-"`
 	Count   int       `json:"count" valid:"-"`
 }

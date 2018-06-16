@@ -12,7 +12,7 @@ import (
 type User struct {
 	Username   string    `json:"username" valid:"stringlength(2|20)"`
 	Registered bool      `json:"registered" valid:"-"`
-	Email      string    `json:"email" valid:"email"`
+	Email      string    `json:"email" valid:"email,required"`
 	Password   string    `json:"password" valid:"-"`
 	Joined     time.Time `json:"joined" valid:"-"`
 	LastVisit  time.Time `json:"last_visit" valid:"-"`
