@@ -3,10 +3,8 @@ package http
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
-	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ravernkoh/jabba/errors"
@@ -176,6 +174,9 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	var f Flash
+
 	var (
 		auths       []*model.Auth
 		authIDs     = r.PostForm["auth[id]"]
@@ -187,38 +188,29 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	for i, m := range authMethods {
-		if m == "" {
+	for i, method := range authMethods {
+		if method == "" {
 			continue
 		}
 
-		var id string
-		if i < len(authIDs) {
-			id = authIDs[i]
-		} else {
-			id = uuid.NewV4().String()
-		}
-
-		method, err := model.NewMethod(m)
+		auth, err := model.NewAuth(method, authValuess[i])
 		if err != nil {
 			logger.WithFields(logrus.Fields{
-				"method": m,
-			}).Warn("invalid auth method given")
+				"err": err,
+			}).Warn("failed to create auth")
+
+			f.Failure = "Could not update link."
+
+			link.Slug = slug
+			s.executeUpdateLinkFormTemplate(w, r, f, link, auths)
+			return
+		}
+		if i < len(authIDs) {
+			auth.ID = authIDs[i]
 		}
 
-		values := strings.Split(authValuess[i], ",")
-		for i := range values {
-			values[i] = strings.TrimSpace(values[i])
-		}
-
-		auths = append(auths, &model.Auth{
-			ID:     id,
-			Method: method,
-			Values: values,
-		})
+		auths = append(auths, auth)
 	}
-
-	var f Flash
 
 	if err := link.Validate(); err != nil {
 		logger.WithFields(logrus.Fields{

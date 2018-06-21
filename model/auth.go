@@ -1,6 +1,12 @@
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/asaskevich/govalidator"
+	uuid "github.com/satori/go.uuid"
+)
 
 // Auth represents a form of authentication for the link.
 type Auth struct {
@@ -19,8 +25,39 @@ const (
 	MethodJabba                  // username
 )
 
-// NewMethod creates a new method based on the given string.
-func NewMethod(method string) (Method, error) {
+// NewAuth creates a new auth, converting and validating the method and values.
+func NewAuth(method string, values string) (*Auth, error) {
+	m, err := newMethod(method)
+	if err != nil {
+		return nil, err
+	}
+
+	v := strings.Split(values, ",")
+	for i := range v {
+		v[i] = strings.TrimSpace(v[i])
+	}
+
+	a := &Auth{
+		ID:     uuid.NewV4().String(),
+		Method: m,
+		Values: v,
+	}
+
+	if err := a.Validate(); err != nil {
+		return nil, err
+	}
+
+	return a, nil
+}
+
+// Validate validates the auth.
+func (a *Auth) Validate() error {
+	_, err := govalidator.ValidateStruct(a)
+	return err
+}
+
+// newMethod creates a new method based on the given string.
+func newMethod(method string) (Method, error) {
 	switch method {
 	case "password":
 		return MethodPassword, nil
