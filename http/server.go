@@ -52,15 +52,8 @@ func (s *Server) Router() chi.Router {
 	fileServer(r, "/public", assets)
 
 	// Mount root routes
-	r.Group(func(r chi.Router) {
-		r.Use(
-			// Authentication
-			s.SetUser,
-		)
-
-		r.Get("/", s.Index)
-		r.Get("/{slug}", s.Redirect)
-	})
+	r.With(s.SetUser).Get("/", s.Index)
+	r.With(s.SetLink).Get("/{slug}", s.Redirect)
 
 	// Mount link routes
 	r.Group(func(r chi.Router) {

@@ -25,11 +25,14 @@ func (s *Server) SetLink(next http.Handler) http.Handler {
 		if err != nil {
 			logger.WithFields(logrus.Fields{
 				"slug": slug,
-			}).Errorf("failed to get link")
+			}).Warnf("failed to get link")
 
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		logger.WithFields(logrus.Fields{
+			"slug": slug,
+		}).Info("got link")
 
 		ctx := context.WithValue(r.Context(), keyLink, l)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -44,6 +47,7 @@ func (s *Server) RequireLink(next http.Handler) http.Handler {
 		logger := middleware.Logger(r)
 		user := s.User(r)
 		link := s.Link(r)
+
 		if _, ok := user.FindLinkSlug(link.Slug); !ok {
 			logger.WithFields(logrus.Fields{
 				"slug": link.Slug,
@@ -96,15 +100,8 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 
 // Redirect redirects to the corresponding page from the slug.
 func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "slug")
-	link, err := s.Database.GetLink(slug)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
+	link := s.Link(r)
 	s.Database.IncrementLinkCount(link)
-
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }
 
