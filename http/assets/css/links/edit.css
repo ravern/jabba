@@ -15,8 +15,25 @@ main form .auths textarea {
     width: 100%;
 }
 
-main form .auths select {
+main form .auths .method {
     width: 100%;
+    display: flex;
+}
+
+main form .auths .method select {
+    flex: 1;
+    margin-right: 1.0rem;
+}
+
+main form .auths .method input {
+    flex: 0.2;
+    background-color: #e33;
+    border-color: #e33;
+}
+
+main form .auths .method input:hover {
+    background-color: #d22;
+    border-color: #d22;
 }
 
 main form button {

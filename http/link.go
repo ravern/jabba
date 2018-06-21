@@ -188,7 +188,7 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i, m := range authMethods {
-		if m == "none" {
+		if m == "" {
 			continue
 		}
 

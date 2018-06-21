@@ -39,6 +39,9 @@ function addAuth() {
     elem.removeAttr('id hidden');
     elem.find('select').attr('name', 'auth[method]');
     elem.find('textarea').attr('name', 'auth[values]');
+    elem.find('input').click(function() {
+        elem.remove();
+    });
     $('.auths').append(elem);
 }
 
