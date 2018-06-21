@@ -64,6 +64,8 @@ func NewLink(url string) (*Link, error) {
 
 // Validate validates the link.
 func (l *Link) Validate() error {
-	_, err := govalidator.ValidateStruct(l)
-	return err
+	if _, err := govalidator.ValidateStruct(l); err != nil {
+		return newValidationError("link", err)
+	}
+	return nil
 }

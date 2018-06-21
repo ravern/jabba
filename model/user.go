@@ -40,7 +40,7 @@ func NewUser(username string, email string) (*User, error) {
 	}
 
 	if err := u.Validate(); err != nil {
-		return nil, newValidationError("user", err)
+		return nil, err
 	}
 
 	return u, nil
@@ -48,8 +48,10 @@ func NewUser(username string, email string) (*User, error) {
 
 // Validate validates the user.
 func (u *User) Validate() error {
-	_, err := govalidator.ValidateStruct(u)
-	return err
+	if _, err := govalidator.ValidateStruct(u); err != nil {
+		return newValidationError("user", err)
+	}
+	return nil
 }
 
 // SetPassword ensures the passwords are equal, generates the hash and then sets

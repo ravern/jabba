@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/ravernkoh/jabba/errors"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -52,8 +53,30 @@ func NewAuth(method string, values string) (*Auth, error) {
 
 // Validate validates the auth.
 func (a *Auth) Validate() error {
-	_, err := govalidator.ValidateStruct(a)
-	return err
+	if _, err := govalidator.ValidateStruct(a); err != nil {
+		return newValidationError("auth", err)
+	}
+
+	switch a.Method {
+	case MethodPassword:
+		if len(a.Values) != 1 {
+			return errors.Error{
+				Type:    errors.Invalid,
+				Message: "auth: invalid",
+			}
+		}
+	case MethodGoogle:
+		for _, v := range a.Values {
+			if !govalidator.IsEmail(v) {
+				return errors.Error{
+					Type:    errors.Invalid,
+					Message: "auth: invalid",
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // newMethod creates a new method based on the given string.
