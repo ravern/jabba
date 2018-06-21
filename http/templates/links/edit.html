@@ -23,6 +23,7 @@
                     <div class="input">
                         <select>
                             <option disabled selected value="">Method</option>
+                            <option value="none">None</option>
                             <option value="password">Password</option>
                             <option value="google">Google</option>
                             <option value="jabba">Jabba</option>
@@ -37,6 +38,7 @@
                         <input type="hidden" name="auth[id]" value="{{ .ID }}" />
                         <select name="auth[method]">
                             <option disabled>Method</option>
+                            <option value="none">None</option>
                             <option 
                                 {{ if eq .Method 0 }}selected{{ end }}
                                 value="password"

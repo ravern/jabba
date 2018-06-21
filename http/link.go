@@ -188,6 +188,10 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	for i, m := range authMethods {
+		if m == "none" {
+			continue
+		}
+
 		var id string
 		if i < len(authIDs) {
 			id = authIDs[i]
