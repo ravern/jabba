@@ -15,4 +15,7 @@ type Database interface {
 	GetLinks(slugs []string) ([]*model.Link, error)
 	GetLink(slug string) (*model.Link, error)
 	DeleteLink(*model.Link, *model.User) error
+
+	UpdateAuths([]*model.Auth, *model.Link) error
+	GetAuths(ids []string) ([]*model.Auth, error)
 }

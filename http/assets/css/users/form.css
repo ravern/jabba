@@ -4,8 +4,9 @@ main {
 
 main form {
     text-align: center;
+    width: 300px;
 }
 
 main form .input input {
-    width: 300px;
+    width: 100%;
 }

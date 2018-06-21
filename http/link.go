@@ -3,8 +3,10 @@ package http
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi"
+	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 
 	"github.com/ravernkoh/jabba/errors"
@@ -140,9 +142,21 @@ func (s *Server) CreateLink(w http.ResponseWriter, r *http.Request) {
 
 // UpdateLinkForm renders to form to update the link.
 func (s *Server) UpdateLinkForm(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
 	link := s.Link(r)
 	flash, _ := s.Flash(w, r)
-	s.executeUpdateLinkFormTemplate(w, r, flash, link)
+
+	auths, err := s.Database.GetAuths(link.AuthIDs)
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"slug": link.Slug,
+		}).Error("failed to get auths for link")
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	s.executeUpdateLinkFormTemplate(w, r, flash, link, auths)
 }
 
 // UpdateLink updates the link.
@@ -156,6 +170,50 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 	link.Title = r.FormValue("title")
 	link.URL = r.FormValue("url")
 
+	// Parse the auths in the form
+	if err := r.ParseForm(); err != nil {
+		logger.Error("failed to parse form")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	var (
+		auths       []*model.Auth
+		authIDs     = r.PostForm["auth[id]"]
+		authMethods = r.PostForm["auth[method]"]
+		authValuess = r.PostForm["auth[values]"]
+	)
+	if len(authMethods) != len(authValuess) {
+		logger.Warn("invalid auths given")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	for i, m := range authMethods {
+		var id string
+		if i < len(authIDs) {
+			id = authIDs[i]
+		} else {
+			id = uuid.NewV4().String()
+		}
+
+		method, err := model.NewMethod(m)
+		if err != nil {
+			logger.WithFields(logrus.Fields{
+				"method": m,
+			}).Warn("invalid auth method given")
+		}
+
+		values := strings.Split(authValuess[i], ",")
+		for i := range values {
+			values[i] = strings.TrimSpace(values[i])
+		}
+
+		auths = append(auths, &model.Auth{
+			ID:     id,
+			Method: method,
+			Values: values,
+		})
+	}
+
 	var f Flash
 
 	if err := link.Validate(); err != nil {
@@ -166,7 +224,7 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		f.Failure = "Could not update link."
 
 		link.Slug = slug
-		s.executeUpdateLinkFormTemplate(w, r, f, link)
+		s.executeUpdateLinkFormTemplate(w, r, f, link, auths)
 		return
 	}
 
@@ -183,7 +241,19 @@ func (s *Server) UpdateLink(w http.ResponseWriter, r *http.Request) {
 		}
 
 		link.Slug = slug
-		s.executeUpdateLinkFormTemplate(w, r, f, link)
+		s.executeUpdateLinkFormTemplate(w, r, f, link, auths)
+		return
+	}
+
+	if err := s.Database.UpdateAuths(auths, link); err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to update auths")
+
+		f.Failure = "Could not update link."
+
+		link.Slug = slug
+		s.executeUpdateLinkFormTemplate(w, r, f, link, auths)
 		return
 	}
 
@@ -217,7 +287,7 @@ func (s *Server) DeleteLink(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
-func (s *Server) executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, l *model.Link) {
+func (s *Server) executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Request, f Flash, l *model.Link, aa []*model.Auth) {
 	executeTemplate(w, r, "layout.html", []string{
 		"nav.css",
 		"links/edit.css",
@@ -225,5 +295,6 @@ func (s *Server) executeUpdateLinkFormTemplate(w http.ResponseWriter, r *http.Re
 		"CurrentUsername": s.currentUsername(r),
 		"Flash":           f,
 		"Link":            l,
+		"Auths":           aa,
 	})
 }

@@ -298,20 +298,22 @@ func (s *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := user.SetPassword(newPassword, confirmPassword); err != nil {
-		logger.WithFields(logrus.Fields{
-			"err": err,
-		}).Warn("could not set password on user")
+	if newPassword != "" {
+		if err := user.SetPassword(newPassword, confirmPassword); err != nil {
+			logger.WithFields(logrus.Fields{
+				"err": err,
+			}).Warn("could not set password on user")
 
-		switch err.(errors.Error).Type {
-		case errors.NotMatched:
-			f.Failure = "Passwords didn't match!"
-		default:
-			f.Failure = "Could not update user."
+			switch err.(errors.Error).Type {
+			case errors.NotMatched:
+				f.Failure = "Passwords didn't match!"
+			default:
+				f.Failure = "Could not update user."
+			}
+
+			s.executeUpdateUserFormTemplate(w, r, f, user)
+			return
 		}
-
-		s.executeUpdateUserFormTemplate(w, r, f, user)
-		return
 	}
 
 	if err := user.Validate(); err != nil {

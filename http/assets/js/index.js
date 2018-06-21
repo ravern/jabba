@@ -32,3 +32,21 @@ function load(remote, local) {
         }
     });
 }
+
+// Clones the auth element and shows it.
+function addAuth() {
+    const elem = $('#auth').clone();
+    elem.removeAttr('id hidden');
+    elem.find('select').attr('name', 'auth[method]');
+    elem.find('textarea').attr('name', 'auth[values]');
+    $('.auths').append(elem);
+}
+
+// Enables the disabled inputs in the form and submit.
+function enableAndSubmit() {
+    const elem = $('form.link');
+    elem.find('select option').each(function() {
+        $(this).prop('disabled', false);
+    });
+    elem.submit();
+}

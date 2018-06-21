@@ -15,6 +15,7 @@ type Link struct {
 	URL     string    `json:"url" valid:"url,required"`
 	Created time.Time `json:"created" valid:"-"`
 	Count   int       `json:"count" valid:"-"`
+	AuthIDs []string  `json:"auth_ids" valid:"-"`
 }
 
 // NewLink creates a new link with the given URL.
@@ -51,6 +52,7 @@ func NewLink(url string) (*Link, error) {
 		Title:   title,
 		URL:     url,
 		Created: time.Now(),
+		AuthIDs: []string{},
 	}
 
 	if err := l.Validate(); err != nil {

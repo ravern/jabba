@@ -12,9 +12,9 @@ import (
 
 // Bucket names.
 const (
-	linksBucket    = "Links"
-	usersBucket    = "Users"
-	visitorsBucket = "Visitors"
+	linksBucket = "Links"
+	usersBucket = "Users"
+	authsBucket = "Auths"
 )
 
 // Database represents the database connection.

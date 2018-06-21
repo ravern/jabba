@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+	"strings"
 
 	"github.com/gobuffalo/packr"
 	"github.com/ravernkoh/jabba/http/middleware"
@@ -31,12 +32,16 @@ func init() {
 	assets = packr.NewBox("./assets")
 
 	// Load templates
-	templates = template.New("")
+	templates = template.New("").Funcs(map[string]interface{}{
+		"join": strings.Join,
+	})
 	box := packr.NewBox("./templates")
 	box.Walk(func(name string, f packr.File) error {
 		template.Must(templates.New(name).Parse(box.String(name)))
 		return nil
 	})
+
+	// Load templates functions
 }
 
 func executeTemplate(w http.ResponseWriter, r *http.Request, layout string, styles []string, layoutData interface{}, name string, data interface{}) {
