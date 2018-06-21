@@ -33,6 +33,15 @@ func main() {
 		databasePath        = os.Getenv("DATABASE_PATH")
 		databaseIntervalStr = os.Getenv("DATABASE_INTERVAL")
 	)
+	if authSecret == "" {
+		panic("AUTH_SECRET must be specified")
+	}
+	if cookieHashKey == "" {
+		panic("COOKIE_HASH_KEY must be specified")
+	}
+	if cookieBlockKey == "" {
+		panic("COOKIE_BLOCK_KEY must be specified")
+	}
 	var databaseInterval int
 	if databaseIntervalStr == "" {
 		databaseInterval = 10
