@@ -24,14 +24,16 @@ func init() {
 func main() {
 	// Get environment variables
 	var (
-		development         = os.Getenv("DEVELOPMENT") != ""
-		hostname            = os.Getenv("HOSTNAME")
-		port                = os.Getenv("PORT")
-		authSecret          = os.Getenv("AUTH_SECRET")
-		cookieHashKey       = os.Getenv("COOKIE_HASH_KEY")
-		cookieBlockKey      = os.Getenv("COOKIE_BLOCK_KEY")
-		databasePath        = os.Getenv("DATABASE_PATH")
-		databaseIntervalStr = os.Getenv("DATABASE_INTERVAL")
+		development                   = os.Getenv("DEVELOPMENT") != ""
+		hostname                      = os.Getenv("HOSTNAME")
+		port                          = os.Getenv("PORT")
+		authSecret                    = os.Getenv("AUTH_SECRET")
+		cookieHashKey                 = os.Getenv("COOKIE_HASH_KEY")
+		cookieBlockKey                = os.Getenv("COOKIE_BLOCK_KEY")
+		googleClientID                = os.Getenv("GOOGLE_CLIENT_ID")
+		googleClientSecret            = os.Getenv("GOOGLE_CLIENT_SECRET")
+		databasePath                  = os.Getenv("DATABASE_PATH")
+		databaseVisitCountIntervalStr = os.Getenv("DATABASE_VISIT_COUNT_INTERVAL")
 	)
 	if authSecret == "" {
 		panic("AUTH_SECRET must be specified")
@@ -42,14 +44,20 @@ func main() {
 	if cookieBlockKey == "" {
 		panic("COOKIE_BLOCK_KEY must be specified")
 	}
-	var databaseInterval int
-	if databaseIntervalStr == "" {
-		databaseInterval = 10
+	if googleClientID == "" {
+		panic("GOOGLE_CLIENT_ID must be specified")
+	}
+	if googleClientSecret == "" {
+		panic("GOOGLE_CLIENT_SECRET must be specified")
+	}
+	var databaseVisitCountInterval int
+	if databaseVisitCountIntervalStr == "" {
+		databaseVisitCountInterval = 10
 	} else {
 		var err error
-		databaseInterval, err = strconv.Atoi(databaseIntervalStr)
+		databaseVisitCountInterval, err = strconv.Atoi(databaseVisitCountIntervalStr)
 		if err != nil {
-			panic("DATABASE_INTERVAL must be an integer")
+			panic("DATABASE_VISIT_COUNT_INTERVAL must be an integer")
 		}
 	}
 
@@ -61,8 +69,8 @@ func main() {
 
 	// Open the database connection
 	database := bolt.Database{
-		Path:     databasePath,
-		Interval: time.Duration(databaseInterval) * time.Second,
+		Path:               databasePath,
+		VisitCountInterval: time.Duration(databaseVisitCountInterval) * time.Second,
 	}
 	if err := database.Open(); err != nil {
 		logger.WithFields(logrus.Fields{
@@ -75,13 +83,15 @@ func main() {
 
 	// Start up the server
 	server := http.Server{
-		Port:           port,
-		Hostname:       hostname,
-		AuthSecret:     authSecret,
-		CookieHashKey:  cookieHashKey,
-		CookieBlockKey: cookieBlockKey,
-		Logger:         logger,
-		Database:       &database,
+		Port:               port,
+		Hostname:           hostname,
+		AuthSecret:         authSecret,
+		CookieHashKey:      cookieHashKey,
+		CookieBlockKey:     cookieBlockKey,
+		GoogleClientID:     googleClientID,
+		GoogleClientSecret: googleClientSecret,
+		Logger:             logger,
+		Database:           &database,
 	}
 	// This is a lie!
 	logger.Infof("server started listening on %s", port)

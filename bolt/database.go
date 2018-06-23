@@ -19,15 +19,15 @@ const (
 
 // Database represents the database connection.
 type Database struct {
-	Path     string
-	Interval time.Duration // interval to write caches to the database
+	Path               string
+	VisitCountInterval time.Duration // interval to write visit count caches to the database
 
 	// Underlying bolt database instance
 	db *bolt.DB
 
 	// Usage counters for each slug
-	counts   map[string]int
-	countsMu sync.Mutex
+	visitCounts   map[string]int
+	visitCountsMu sync.Mutex
 }
 
 // Open opens up a connection to the database.
@@ -38,10 +38,10 @@ func (d *Database) Open() error {
 	}
 	d.db = db
 
-	d.counts = make(map[string]int)
+	d.visitCounts = make(map[string]int)
 	go func() {
 		for {
-			time.Sleep(d.Interval)
+			time.Sleep(d.VisitCountInterval)
 			d.updateLinkCounts()
 		}
 	}()

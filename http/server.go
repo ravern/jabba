@@ -7,24 +7,40 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/ravernkoh/jabba/http/middleware"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 // Server serves the website.
 type Server struct {
-	Port           string
-	Hostname       string
-	AuthSecret     string
-	CookieHashKey  string
-	CookieBlockKey string
-	Logger         logrus.FieldLogger
-	Database       Database
+	Port               string
+	Hostname           string
+	AuthSecret         string
+	CookieHashKey      string
+	CookieBlockKey     string
+	GoogleClientID     string
+	GoogleClientSecret string
+	Logger             logrus.FieldLogger
+	Database           Database
 
-	cookie *securecookie.SecureCookie
+	cookie       *securecookie.SecureCookie
+	googleConfig *oauth2.Config
 }
 
 // Listen listens for requests, blocking until an error occurs.
 func (s *Server) Listen() error {
 	s.cookie = securecookie.New([]byte(s.CookieHashKey), []byte(s.CookieBlockKey))
+
+	s.googleConfig = &oauth2.Config{
+		ClientID:     s.GoogleClientID,
+		ClientSecret: s.GoogleClientSecret,
+		RedirectURL:  s.Hostname + "/auth/google",
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+		},
+		Endpoint: google.Endpoint,
+	}
+
 	return http.ListenAndServe(s.Port, s.Router())
 }
 
@@ -52,8 +68,20 @@ func (s *Server) Router() chi.Router {
 	fileServer(r, "/public", assets)
 
 	// Mount root routes
-	r.With(s.SetUser).Get("/", s.Index)
-	r.With(s.SetLink).Get("/{slug}", s.Redirect)
+	r.Group(func(r chi.Router) {
+		r.Use(
+			// Authentication
+			s.SetUser,
+		)
+
+		r.Get("/", s.Index)
+		r.With(s.SetLink).Get("/{slug}", s.Redirect)
+	})
+
+	// Mount auth routes
+	r.Group(func(r chi.Router) {
+		r.Get("/auth/google", s.AuthGoogle)
+	})
 
 	// Mount link routes
 	r.Group(func(r chi.Router) {

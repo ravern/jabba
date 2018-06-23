@@ -53,25 +53,25 @@ func (d *Database) DeleteLink(l *model.Link, u *model.User) error {
 
 // IncrementLinkCount increments the usage count of the given link.
 func (d *Database) IncrementLinkCount(l *model.Link) {
-	d.countsMu.Lock()
-	defer d.countsMu.Unlock()
+	d.visitCountsMu.Lock()
+	defer d.visitCountsMu.Unlock()
 
-	_, ok := d.counts[l.Slug]
+	_, ok := d.visitCounts[l.Slug]
 	if !ok {
-		d.counts[l.Slug] = 0
+		d.visitCounts[l.Slug] = 0
 	}
 
-	d.counts[l.Slug]++
+	d.visitCounts[l.Slug]++
 	l.Count++
 }
 
 // updateLinkCounts writes the usage counts cache into the database.
 func (d *Database) updateLinkCounts() {
-	d.countsMu.Lock()
-	defer d.countsMu.Unlock()
+	d.visitCountsMu.Lock()
+	defer d.visitCountsMu.Unlock()
 
 	d.db.Update(func(tx *bolt.Tx) error {
-		for slug, count := range d.counts {
+		for slug, count := range d.visitCounts {
 			var l *model.Link
 			if err := d.get(tx, "link", linksBucket, []byte(slug), &l); err != nil {
 				continue
@@ -85,7 +85,7 @@ func (d *Database) updateLinkCounts() {
 		return nil
 	})
 
-	d.counts = make(map[string]int)
+	d.visitCounts = make(map[string]int)
 }
 
 // UpdateLinkSlug updates the given link, including changes to the slug.

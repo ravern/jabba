@@ -100,7 +100,55 @@ func (s *Server) Index(w http.ResponseWriter, r *http.Request) {
 
 // Redirect redirects to the corresponding page from the slug.
 func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
+	logger := middleware.Logger(r)
 	link := s.Link(r)
+
+	auths, err := s.Database.GetAuths(link.AuthIDs)
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"err": err,
+		}).Error("failed to get auths")
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	model.SortAuths(auths)
+
+	var authed bool
+	for _, auth := range auths {
+		switch auth.Method {
+		case model.MethodJabba:
+			user := s.User(r)
+			for _, username := range auth.Values {
+				if user.Username == username {
+					authed = true
+					break
+				}
+			}
+		case model.MethodGoogle:
+			a, err := s.Auth(w, r)
+			if err != nil {
+				logger.Info("redirecting to Google OAuth")
+
+				http.Redirect(w, r, s.googleConfig.AuthCodeURL(link.Slug), http.StatusFound)
+				return
+			}
+
+			for _, email := range auth.Values {
+				if a.Google == email {
+					authed = true
+					break
+				}
+			}
+		}
+	}
+
+	if !authed {
+		logger.Warn("redirect link unauthorized")
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	s.Database.IncrementLinkCount(link)
 	http.Redirect(w, r, link.URL, http.StatusFound)
 }

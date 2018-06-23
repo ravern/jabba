@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -90,4 +91,24 @@ func newMethod(method string) (Method, error) {
 		return MethodJabba, nil
 	}
 	return 0, fmt.Errorf("auth: invalid method provided")
+}
+
+type auths []*Auth
+
+func (aa auths) Len() int {
+	return len(aa)
+}
+
+func (aa auths) Less(i, j int) bool {
+	return aa[j].Method < aa[i].Method
+}
+
+func (aa auths) Swap(i, j int) {
+	aa[i], aa[j] = aa[j], aa[i]
+}
+
+// SortAuths sorts the given auths in reverse order based on their method (so
+// the password method is last).
+func SortAuths(aa []*Auth) {
+	sort.Sort(auths(aa))
 }
