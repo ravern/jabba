@@ -142,6 +142,9 @@ func (s *Server) Redirect(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	if len(auths) == 0 {
+		authed = true
+	}
 
 	if !authed {
 		logger.Warn("redirect link unauthorized")
