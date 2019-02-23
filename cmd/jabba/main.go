@@ -15,10 +15,7 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UTC().UnixNano())
-
-	if err := godotenv.Load(); err != nil {
-		panic(err)
-	}
+	godotenv.Load()
 }
 
 func main() {
