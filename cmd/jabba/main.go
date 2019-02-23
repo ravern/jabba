@@ -80,7 +80,7 @@ func main() {
 
 	// Start up the server
 	server := http.Server{
-		Port:               port,
+		Port:               ":" + port,
 		Hostname:           hostname,
 		AuthSecret:         authSecret,
 		CookieHashKey:      cookieHashKey,
@@ -91,7 +91,7 @@ func main() {
 		Database:           &database,
 	}
 	// This is a lie!
-	logger.Infof("server started listening on %s", port)
+	logger.Infof("server started listening on port %s", port)
 	err := server.Listen()
 	logger.WithFields(logrus.Fields{
 		"err": err,

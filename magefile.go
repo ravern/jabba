@@ -17,7 +17,6 @@ var Default = Development
 var Aliases = map[string]interface{}{
 	"dev":  Development,
 	"prod": Production,
-	"dep":  Deploy,
 }
 
 // Development starts the development server
@@ -81,33 +80,10 @@ func Production() error {
 	}
 
 	logrus.Debug("building the binary")
-	if err := sh.RunWith(map[string]string{
-		"GOOS":   "linux",
-		"GOARCH": "amd64",
-	}, "go", "build", "-o", "releases/jabba", "./cmd/jabba"); err != nil {
+	if err := sh.RunV("go", "build", "-o", "releases/jabba", "./cmd/jabba"); err != nil {
 		return err
 	}
 
 	logrus.Debug("cleaning static files")
 	return sh.RunV("packr", "clean")
-}
-
-const SSH = "ravernkoh@jabba.xyz"
-
-// Deploy copies the production binary onto the server
-func Deploy() error {
-	logrus.SetLevel(logrus.DebugLevel)
-
-	logrus.Debug("stopping the service")
-	if err := sh.RunV("ssh", SSH, "sudo systemctl stop jabba"); err != nil {
-		return err
-	}
-
-	logrus.Debug("copying the binary")
-	if err := sh.RunV("scp", "releases/jabba", SSH+":~/jabba/jabba"); err != nil {
-		return err
-	}
-
-	logrus.Debug("starting the service")
-	return sh.RunV("ssh", SSH, "sudo systemctl start jabba")
 }

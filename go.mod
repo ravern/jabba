@@ -5,6 +5,7 @@ require (
 	github.com/andreaskoch/go-fswatch v1.0.0
 	github.com/asaskevich/govalidator v0.0.0-20180319081651-7d2e70ef918f
 	github.com/boltdb/bolt v1.3.1
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go v0.0.0-20180308231308-06ea1031745c
 	github.com/go-chi/chi v0.0.0-20171222161133-e83ac2304db3
 	github.com/gobuffalo/packr v1.11.0
@@ -12,9 +13,11 @@ require (
 	github.com/golang/protobuf v1.1.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.2.0
+	github.com/magefile/mage v1.8.0
 	github.com/onsi/ginkgo v1.5.0
 	github.com/onsi/gomega v1.4.0
 	github.com/pkg/errors v0.8.0
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.0.5
 	github.com/stretchr/testify v1.2.1
