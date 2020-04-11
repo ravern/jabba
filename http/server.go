@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/gorilla/securecookie"
-	"github.com/ravernkoh/jabba/http/middleware"
+	"github.com/ravern/jabba/http/middleware"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"

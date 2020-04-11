@@ -1,6 +1,6 @@
 package http
 
-import "github.com/ravernkoh/jabba/model"
+import "github.com/ravern/jabba/model"
 
 // Database represents the database.
 type Database interface {

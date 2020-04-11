@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/ravernkoh/jabba/errors"
+	"github.com/ravern/jabba/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 

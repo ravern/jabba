@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ravernkoh/jabba/http/middleware"
+	"github.com/ravern/jabba/http/middleware"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )

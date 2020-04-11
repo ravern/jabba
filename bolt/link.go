@@ -2,8 +2,8 @@ package bolt
 
 import (
 	"github.com/boltdb/bolt"
-	"github.com/ravernkoh/jabba/errors"
-	"github.com/ravernkoh/jabba/model"
+	"github.com/ravern/jabba/errors"
+	"github.com/ravern/jabba/model"
 )
 
 // CreateLink creates a new link and adds that link to the user.

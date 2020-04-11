@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
-	"github.com/ravernkoh/jabba/bolt"
-	"github.com/ravernkoh/jabba/http"
+	"github.com/ravern/jabba/bolt"
+	"github.com/ravern/jabba/http"
 	"github.com/sirupsen/logrus"
 )
 

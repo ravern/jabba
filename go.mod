@@ -1,4 +1,4 @@
-module github.com/ravernkoh/jabba
+module github.com/ravern/jabba
 
 require (
 	cloud.google.com/go v0.24.0

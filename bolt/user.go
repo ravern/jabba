@@ -2,7 +2,7 @@ package bolt
 
 import (
 	"github.com/boltdb/bolt"
-	"github.com/ravernkoh/jabba/model"
+	"github.com/ravern/jabba/model"
 )
 
 // CreateUser creates a new user.

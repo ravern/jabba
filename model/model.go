@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/ravernkoh/jabba/errors"
+	"github.com/ravern/jabba/errors"
 )
 
 func init() {

@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ravernkoh/jabba/auth"
-	"github.com/ravernkoh/jabba/errors"
-	"github.com/ravernkoh/jabba/http/middleware"
-	"github.com/ravernkoh/jabba/model"
+	"github.com/ravern/jabba/auth"
+	"github.com/ravern/jabba/errors"
+	"github.com/ravern/jabba/http/middleware"
+	"github.com/ravern/jabba/model"
 	"github.com/sirupsen/logrus"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/ravernkoh/jabba/errors"
+	"github.com/ravern/jabba/errors"
 	uuid "github.com/satori/go.uuid"
 )
 

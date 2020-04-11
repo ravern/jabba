@@ -7,9 +7,9 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/sirupsen/logrus"
 
-	"github.com/ravernkoh/jabba/errors"
-	"github.com/ravernkoh/jabba/http/middleware"
-	"github.com/ravernkoh/jabba/model"
+	"github.com/ravern/jabba/errors"
+	"github.com/ravern/jabba/http/middleware"
+	"github.com/ravern/jabba/model"
 )
 
 // SetLink sets the link in the context.

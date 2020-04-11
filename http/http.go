@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/packr"
-	"github.com/ravernkoh/jabba/http/middleware"
+	"github.com/ravern/jabba/http/middleware"
 	"github.com/sirupsen/logrus"
 )
 

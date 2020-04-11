@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
-	"github.com/ravernkoh/jabba/errors"
+	"github.com/ravern/jabba/errors"
 )
 
 // Bucket names.
