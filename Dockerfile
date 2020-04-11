@@ -1,6 +1,6 @@
 FROM golang:1.11.5-alpine
 
-WORKDIR /go/src/github.com/ravernkoh/jabba
+WORKDIR /go/src/github.com/ravern/jabba
 
 COPY . .
 
@@ -16,13 +16,11 @@ RUN mage prod
 
 FROM alpine:3.9
 
-ENV HOSTNAME jabba.ravernkoh.me
+ENV HOSTNAME jabba.ravern.co
 ENV PORT 80
 
 WORKDIR /app
 
-COPY --from=0 /go/src/github.com/ravernkoh/jabba/releases/jabba .
-
-VOLUME [ "/app/bolt.db" ]
+COPY --from=0 /go/src/github.com/ravern/jabba/releases/jabba .
 
 CMD [ "./jabba" ]

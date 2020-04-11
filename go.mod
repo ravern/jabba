@@ -13,7 +13,7 @@ require (
 	github.com/golang/protobuf v1.1.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/joho/godotenv v1.2.0
-	github.com/magefile/mage v1.8.0
+	github.com/magefile/mage v1.9.0
 	github.com/onsi/ginkgo v1.5.0
 	github.com/onsi/gomega v1.4.0
 	github.com/pkg/errors v0.8.0
