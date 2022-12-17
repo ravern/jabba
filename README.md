@@ -1,5 +1,5 @@
 # Jabba
-Fast and simple link shortener with cool features!
+Fast and simple link shortener.
 
 ## Development
 Some commands need to be installed to work on Jabba.
